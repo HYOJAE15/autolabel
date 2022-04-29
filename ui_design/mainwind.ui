@@ -42,6 +42,7 @@
      <addaction name="actionLabeling_2"/>
      <addaction name="actionBrush"/>
     </widget>
+    <addaction name="actionTools"/>
     <addaction name="menuLabeling"/>
    </widget>
    <widget class="QMenu" name="menuProject">
@@ -77,6 +78,11 @@
   <action name="actionBrush">
    <property name="text">
     <string>Brush</string>
+   </property>
+  </action>
+  <action name="actionTools">
+   <property name="text">
+    <string>Tools</string>
    </property>
   </action>
  </widget>

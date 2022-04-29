@@ -16,7 +16,7 @@ def resource_path(relative_path):
 #UI파일 연결
 #단, UI파일은 Python 코드 파일과 같은 디렉토리에 위치해야한다.
 # pyinstaller 로 하나의 실행파일 생성시 아래와 같이 
-form = resource_path("auto-labeling.ui")
+form = resource_path("./uiscripts/auto-labeling.ui")
 form_class = uic.loadUiType(form)[0]
 
 #화면을 띄우는데 사용되는 Class 선언

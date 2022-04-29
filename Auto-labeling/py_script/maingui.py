@@ -31,8 +31,8 @@ class Mainwind(QMainWindow, form_class_1) :
 
 
 
-    def actionToolsFunction(self) :
-        window_2 = 
+    # def actionToolsFunction(self) :
+        # window_2 = 
 
 # toolswind
 class toolswind(QMainWindow, form_class_2) :

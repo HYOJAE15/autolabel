@@ -49,10 +49,18 @@
     <property name="title">
      <string>Project</string>
     </property>
+    <addaction name="actionFolder_2"/>
+   </widget>
+   <widget class="QMenu" name="menuImage">
+    <property name="title">
+     <string>Image</string>
+    </property>
+    <addaction name="actionOpen_2"/>
    </widget>
    <addaction name="menufile"/>
    <addaction name="menuTools"/>
    <addaction name="menuProject"/>
+   <addaction name="menuImage"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen">
@@ -83,6 +91,16 @@
   <action name="actionTools">
    <property name="text">
     <string>Tools</string>
+   </property>
+  </action>
+  <action name="actionOpen_2">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionFolder_2">
+   <property name="text">
+    <string>Folder</string>
    </property>
   </action>
  </widget>

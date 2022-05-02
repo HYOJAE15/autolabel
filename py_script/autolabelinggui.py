@@ -3,11 +3,11 @@ from PyQt5 import QtGui
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
+
 from utils import resource_path
 
 import cv2   # computer vision library 오픈소스 컴퓨터 비전 
 import os 
-
 
 # import os, import sys  한다음 위 함수 정의 해서 pyinstaller 오류 해결
 
@@ -15,7 +15,8 @@ import os
 #UI파일 연결
 #단, UI파일은 Python 코드 파일과 같은 디렉토리에 위치해야한다.
 # pyinstaller 로 하나의 실행파일 생성시 아래와 같이 
-form = resource_path("auto-labeling.ui")
+
+form = resource_path("./uiscripts/auto-labeling.ui")
 form_class = uic.loadUiType(form)[0]
 
 #화면을 띄우는데 사용되는 Class 선언

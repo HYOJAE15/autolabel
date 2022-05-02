@@ -3,19 +3,19 @@ from PyQt5 import QtGui
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
+
+from utils import resource_path
+
 import cv2   # computer vision library 오픈소스 컴퓨터 비전 
 import os 
 
-def resource_path(relative_path): 
-    """ Get absolute path to resource, works for dev and for PyInstaller """ 
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__))) 
-    return os.path.join(base_path, relative_path)
 # import os, import sys  한다음 위 함수 정의 해서 pyinstaller 오류 해결
 
 
 #UI파일 연결
 #단, UI파일은 Python 코드 파일과 같은 디렉토리에 위치해야한다.
 # pyinstaller 로 하나의 실행파일 생성시 아래와 같이 
+
 form = resource_path("./uiscripts/auto-labeling.ui")
 form_class = uic.loadUiType(form)[0]
 

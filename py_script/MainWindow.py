@@ -1,9 +1,10 @@
+import os
 import sys
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QTreeView,QFileSystemModel,QApplication
 from PyQt5 import uic
-import os 
 
 def resource_path(relative_path): 
     """ Get absolute path to resource, works for dev and for PyInstaller """ 
@@ -63,11 +64,22 @@ class MainWindow(QMainWindow, form_class_main) :
     def __init__(self) :
         super().__init__()
         self.setupUi(self)
+
+        # scroll area 
+        self.scroll = QScrollArea
+
         
+        # treeview
+        self.folderPath = None
+        self.pathRoot = QtCore.QDir.rootPath()
+        self.treeModel = QFileSystemModel(self)
+        self.dialog = QFileDialog()
+
         # menubar action
         self.actionTools.triggered.connect(self.actionToolsFunction)
         self.actionOpen.triggered.connect(self.actionOpenFunction)
-        self.actionOpen_2.triggered.connect(self.actionOpen_2Function)
+        self.actionOpenImage.triggered.connect(self.actionOpenImageFunction)
+        self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
 
     # menubar action Function
 
@@ -77,11 +89,24 @@ class MainWindow(QMainWindow, form_class_main) :
     def actionOpenFunction(self) :
         ImageDialog(self)
 
-
-    def actionOpen_2Function(self) :
+    # 메뉴바의 openimage 클릭시 mainimageviewer 에 이미지를 보여준다
+    def actionOpenImageFunction(self) :
         filename = QFileDialog.getOpenFileName(self, 'open image', 'C:/', 'images (*.jpg *.psd *.png)')
         imagepath = filename[0]
         pixmap = QPixmap(imagepath)
+        self.mainImageViewer.setPixmap(QPixmap(pixmap))
+        
+
+    # 메뉴바 의 openfolder 클릭시 treeview 에 해당 폴더를 보여준다
+    def actionOpenFolderFunction(self) :
+        readFolderPath = self.dialog.getExistingDirectory(self, "Select Folder")
+        self.folderPath = readFolderPath
+        self.treeModel.setRootPath(self.folderPath)
+        self.indexRoot = self.treeModel.index(self.treeModel.rootPath())
+        
+        self.treeView.setModel(self.treeModel)
+        self.treeView.setRootIndex(self.indexRoot)
+
 
 
 

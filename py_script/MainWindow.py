@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QTreeView,QFileSystemModel,QApplication
 from PyQt5 import uic
 
+
 def resource_path(relative_path): 
     """ Get absolute path to resource, works for dev and for PyInstaller """ 
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__))) 
@@ -38,6 +39,7 @@ class ToolsDialog(QDialog, form_class_tools) :
         self.show()
 
 # ImageDialog, when imagefile open
+# 추가적으로 이미지 창 띄우는 기능
 # 이미지 사이즈 대로 출력한다.
 class ImageDialog(QDialog, form_class_image) :
     def __init__(self, parent) :
@@ -66,6 +68,7 @@ class MainWindow(QMainWindow, form_class_main) :
         self.setupUi(self)
 
         # scroll area 
+        # 스크롤 영역 설정시 각 창을 설정?? 
         self.scroll = QScrollArea
 
         
@@ -80,6 +83,10 @@ class MainWindow(QMainWindow, form_class_main) :
         self.actionOpen.triggered.connect(self.actionOpenFunction)
         self.actionOpenImage.triggered.connect(self.actionOpenImageFunction)
         self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
+
+        # treeview double click   위치가 mainwindow 인가 treeview function 안인가??
+        
+
 
     # menubar action Function
 
@@ -97,9 +104,9 @@ class MainWindow(QMainWindow, form_class_main) :
         self.mainImageViewer.setPixmap(QPixmap(pixmap))
         
 
-    # 메뉴바 의 openfolder 클릭시 treeview 에 해당 폴더를 보여준다
+    # 메뉴바 의 openfolder 클릭시 treeview 에 해당 폴더를 보여준다, treeview function
     def actionOpenFolderFunction(self) :
-        readFolderPath = self.dialog.getExistingDirectory(self, "Select Folder")
+        readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder")
         self.folderPath = readFolderPath
         self.treeModel.setRootPath(self.folderPath)
         self.indexRoot = self.treeModel.index(self.treeModel.rootPath())

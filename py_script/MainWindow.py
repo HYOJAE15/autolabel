@@ -1,10 +1,10 @@
 import os
 import sys
-from PyQt5 import QtGui, QtCore
+
+from PyQt5 import QtCore, QtGui, uic
+from PyQt5.QtCore import QModelIndex, Qt, pyqtSlot
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import *
-from PyQt5.QtWidgets import QTreeView,QFileSystemModel,QApplication
-from PyQt5 import uic
 
 
 def resource_path(relative_path): 
@@ -67,25 +67,28 @@ class MainWindow(QMainWindow, form_class_main) :
         super().__init__()
         self.setupUi(self)
 
-        # scroll area 
-        # 스크롤 영역 설정시 각 창을 설정?? 
-        self.scroll = QScrollArea
-
+        self.scale = 1
         
         # treeview
         self.folderPath = None
         self.pathRoot = QtCore.QDir.rootPath()
         self.treeModel = QFileSystemModel(self)
         self.dialog = QFileDialog()
-
+       
         # menubar action
         self.actionTools.triggered.connect(self.actionToolsFunction)
         self.actionOpen.triggered.connect(self.actionOpenFunction)
         self.actionOpenImage.triggered.connect(self.actionOpenImageFunction)
         self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
 
+        # zoom in and out
+        self.zoomInButton.clicked.connect(self.on_zoom_in)
+        self.zoomOutButton.clicked.connect(self.on_zoom_out)
+
         # treeview double click   위치가 mainwindow 인가 treeview function 안인가??
-        
+        self.treeView.clicked.connect(self.treeViewImage)
+
+
 
 
     # menubar action Function
@@ -102,6 +105,7 @@ class MainWindow(QMainWindow, form_class_main) :
         imagepath = filename[0]
         pixmap = QPixmap(imagepath)
         self.mainImageViewer.setPixmap(QPixmap(pixmap))
+        self.filename.setText(imagepath)  # filename 라벨에 파일명 들어가게 
         
 
     # 메뉴바 의 openfolder 클릭시 treeview 에 해당 폴더를 보여준다, treeview function
@@ -113,6 +117,44 @@ class MainWindow(QMainWindow, form_class_main) :
         
         self.treeView.setModel(self.treeModel)
         self.treeView.setRootIndex(self.indexRoot)
+
+    # treeview 에서 파일 클릭 시 클릭된 파일 로드 
+    @pyqtSlot(QModelIndex)
+    def treeViewImage(self, index) :
+
+        indexItem = self.treeModel.index(index.row(), 0, index.parent())
+        filePath = self.treeModel.filePath(indexItem)
+
+        self.pixmap = QPixmap(filePath) 
+        # self.original_image = QPixmap(filePath) # original image path
+        # self.label_image = QPixmap(filePath) # label image path
+        # self.pallette 
+        # self.color_image 
+
+        # blend 
+        # self.blendid_image = self.org_img * 0.7 + self.label * 0.3
+
+        self.scale = self.mainImageViewer.height() / self.pixmap.height()
+        self.resize_image()
+
+
+    def on_zoom_in(self, event):
+        self.scale *= 2
+        self.resize_image()
+
+    def on_zoom_out(self, event):
+        self.scale /= 2
+        self.resize_image()
+
+    def resize_image(self):
+        
+        size = self.pixmap.size()
+        scaled_pixmap = self.pixmap.scaled(self.scale * size)
+        self.mainImageViewer.setPixmap(scaled_pixmap)
+
+    # def change_opacity 
+        # op_change_image = TWE$R^#$@%^
+        # self.mainImageViewer.setPixmap(op_change_image)
 
 
 

@@ -17,87 +17,48 @@ def resource_path(relative_path):
 # UI파일 연결, MainWindow 열고 각 menu 들은 Dialog 로 실행 
 # mainwind.ui 에서 각 메뉴의 Dialog창을 띄운다.
 
-# MainWindow
+# MainWindow UI
 form_main = resource_path("../ui_design/mainwind.ui")
 form_class_main = uic.loadUiType(form_main)[0]
 
-# ToolsDialog
-form_tools = resource_path("../ui_design/toolsdial.ui")
-form_class_tools = uic.loadUiType(form_tools)[0]
-
-# ImageDialog
-form_image = resource_path("../ui_design/imagedial.ui")
-form_class_image = uic.loadUiType(form_image)[0]
-
-
-# menu
-# ToolsDialog
-class ToolsDialog(QDialog, form_class_tools) :
-    def __init__(self, parent) :
-        super().__init__(parent)
-        self.setupUi(self)
-        self.show()
-
-# ImageDialog, when imagefile open
-# 추가적으로 이미지 창 띄우는 기능
-# 이미지 사이즈 대로 출력한다.
-class ImageDialog(QDialog, form_class_image) :
-    def __init__(self, parent) :
-        super().__init__(parent)
-        self.setupUi(self)
-        self.show()
-
-        # ImageDialog : 내부 버튼 
-        self.btn_img_op.clicked.connect(self.btn_img_opFunction)
-    # ImageDialog 내부 버튼 클릭시  
-    # 사진 사이즈 대로 pixmap resize 하고 그에 맞게 label 이 조정 되면서 사진 크기 에 맞게 출력 된다
-    def btn_img_opFunction(self):
-        fname = QFileDialog.getOpenFileName(self, 'Open file','/', "Image files (*.jpg *.png)")
-        imagePath = fname[0]
-        pixmap = QPixmap(imagePath)
-        self.label.setPixmap(QPixmap(pixmap))
-        self.resize(pixmap.width(), pixmap.height())
 
 
 
-# Mainwindow
+# Mainwindow class
 
 class MainWindow(QMainWindow, form_class_main) :
     def __init__(self) :
         super().__init__()
         self.setupUi(self)
 
-        self.scale = 1
+    
         
         # treeview
         self.folderPath = None
         self.pathRoot = QtCore.QDir.rootPath()
         self.treeModel = QFileSystemModel(self)
         self.dialog = QFileDialog()
-       
-        # menubar action
-        self.actionTools.triggered.connect(self.actionToolsFunction)
-        self.actionOpen.triggered.connect(self.actionOpenFunction)
+        self.treeView.clicked.connect(self.treeViewImage)
+
+
+        # file 메뉴 
         self.actionOpenImage.triggered.connect(self.actionOpenImageFunction)
         self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
 
         # zoom in and out
+        self.scale = 1
         self.zoomInButton.clicked.connect(self.on_zoom_in)
         self.zoomOutButton.clicked.connect(self.on_zoom_out)
 
-        # treeview double click   위치가 mainwindow 인가 treeview function 안인가??
-        self.treeView.clicked.connect(self.treeViewImage)
+        # Brush
+        #self.brushButton.clicked.connect(self.burshFunction)
+
+       
 
 
 
 
     # menubar action Function
-
-    def actionToolsFunction(self) :
-        ToolsDialog(self)  
-
-    def actionOpenFunction(self) :
-        ImageDialog(self)
 
     # 메뉴바의 openimage 클릭시 mainimageviewer 에 이미지를 보여준다
     def actionOpenImageFunction(self) :
@@ -119,6 +80,7 @@ class MainWindow(QMainWindow, form_class_main) :
         self.treeView.setRootIndex(self.indexRoot)
 
     # treeview 에서 파일 클릭 시 클릭된 파일 로드 
+    # 이미지 파일 클릭시 묶여있는 라벨링 이미지 와 함께 불러와 합성후 하나의 파일로 만들어 보여준다
     @pyqtSlot(QModelIndex)
     def treeViewImage(self, index) :
 
@@ -126,8 +88,8 @@ class MainWindow(QMainWindow, form_class_main) :
         filePath = self.treeModel.filePath(indexItem)
 
         self.pixmap = QPixmap(filePath) 
-        # self.original_image = QPixmap(filePath) # original image path
-        # self.label_image = QPixmap(filePath) # label image path
+        # self.original_image = QPixmap(org_img_filePath) # original image path
+        # self.label_image = QPixmap(lab_img_filePath) # label image path
         # self.pallette 
         # self.color_image 
 
@@ -151,7 +113,9 @@ class MainWindow(QMainWindow, form_class_main) :
         size = self.pixmap.size()
         scaled_pixmap = self.pixmap.scaled(self.scale * size)
         self.mainImageViewer.setPixmap(scaled_pixmap)
-
+    
+    
+    # 투명도 조절 함수 
     # def change_opacity 
         # op_change_image = TWE$R^#$@%^
         # self.mainImageViewer.setPixmap(op_change_image)

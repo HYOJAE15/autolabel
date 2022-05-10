@@ -66,7 +66,6 @@ class MainWindow(QMainWindow, form_class_main) :
         imagepath = filename[0]
         pixmap = QPixmap(imagepath)
         self.mainImageViewer.setPixmap(QPixmap(pixmap))
-        self.filename.setText(imagepath)  # filename 라벨에 파일명 들어가게 
         
 
     # 메뉴바 의 openfolder 클릭시 treeview 에 해당 폴더를 보여준다, treeview function

@@ -359,7 +359,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QSlider" name="horizontalSlider">
+         <widget class="QSlider" name="lableOpacitySlider">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -482,5 +482,22 @@
   </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>lableOpacitySlider</sender>
+   <signal>sliderPressed()</signal>
+   <receiver>scrollArea</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>652</x>
+     <y>516</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>510</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

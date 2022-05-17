@@ -1,6 +1,10 @@
 import os 
 import sys
 
+import numpy as np 
+
+from PyQt5.QtGui import QImage
+
 def resource_path(relative_path): 
     """ 
     Get absolute path to resource, works for dev and for PyInstaller 
@@ -17,3 +21,31 @@ def resource_path(relative_path):
     
     return abs_path
 
+def cvtArrayToQImage(array):
+
+    if len(array.shape) == 3 : 
+        h, w, _ = array.shape
+    else :
+        raise 
+
+    return QImage(array.data, w, h, 3 * w, QImage.Format_RGB888)
+
+
+def blendImageWithColorMap(image, label, palette, alpha):
+    """ blend image with color map 
+    Args: 
+        image (3d np.array): RGB image
+        label (2d np.array): 1 channel gray-scale image
+        pallete (2d np.array) 
+        alpha (float)
+
+    Returns: 
+        color_map (3d np.array): RGB image
+    """
+
+    color_map = np.zeros_like(image)
+    
+    for idx, color in enumerate(palette) : 
+        color_map[label == idx, :] = image[label == idx, :] * alpha + color * (1-alpha)
+
+    return color_map

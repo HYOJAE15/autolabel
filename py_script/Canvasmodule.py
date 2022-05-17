@@ -4,9 +4,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 
-
-
-
 class Canvas(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -90,4 +87,3 @@ class Canvas(QtWidgets.QWidget):
         if event.button() == Qt.LeftButton:
 			# make drawing flag false
             self.drawing = False
-

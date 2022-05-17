@@ -15,7 +15,7 @@ from Canvasmodule import Canvas
 
 
 
-
+# Select folder "autolabel"
 # MainWindow UI
 ui_folder = 'ui_design'
 project_folder_ui = 'mainWindow.ui'
@@ -31,6 +31,9 @@ class MainWindow(QMainWindow, form_class_main) :
         super().__init__()
         self.setupUi(self)
 
+        # Image Blending
+        self.alpha = 0.8
+
         # treeview
         self.folderPath = None
         self.pathRoot = QtCore.QDir.rootPath()
@@ -43,8 +46,6 @@ class MainWindow(QMainWindow, form_class_main) :
         self.win_name = "Label Opacity"
         self.slide_name = "Opacity"
     
-
-
         # file 메뉴 
         self.actionOpenImage.triggered.connect(self.actionOpenImageFunction)
         self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
@@ -60,19 +61,6 @@ class MainWindow(QMainWindow, form_class_main) :
         self.canvas = Canvas()
         self.scrollArea.setWidget(self.canvas)
 
-        # image blending & label opacity
-        # image blending 을 통해 original, colored  이미지 2장을 불러와 blending 후 alpha 값 조절해서 투명도 조절
-        # self.img1 = 
-
-        # self.img2 = 
-
-       
-
-
-
-
-        # menubar action Function
-
     # 메뉴바의 openimage 클릭시 mainimageviewer 에 이미지를 보여준다
     def actionOpenImageFunction(self) :
         """To be depreciated.
@@ -86,8 +74,6 @@ class MainWindow(QMainWindow, form_class_main) :
 
         self.canvas.readImageFromFile(imagepath)
         
-        
-
     # 메뉴바 의 openfolder 클릭시 treeview 에 해당 폴더를 보여준다, treeview function
     def actionOpenFolderFunction(self) :
         readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder")
@@ -121,10 +107,11 @@ class MainWindow(QMainWindow, form_class_main) :
 
         self.color_label = np.zeros_like(self.img)
 
-        alpha = 0.8
+        
 
-        # background, crack, rebar exposure, spalling, efflorescence 
-        pallete = np.array([[0, 0, 0], [255, 0, 0], [0, 255, 0], [0, 0, 255], [0, 255, 255]])
+        # background, crack, rebar exposure, spalling, efflorescence(?)  
+                         #  Back       crack         rebar ex       spalling     efflorescence 
+        pallete = np.array([[0, 0, 0], [255, 0, 0], [255, 255, 0], [0, 0, 255], [255, 0, 255]])
 
         for idx, color in enumerate(pallete) : 
             self.color_label[self.label == idx, :] = self.img[self.label == idx, :] * alpha + color * (1-alpha)

@@ -34,6 +34,14 @@ class MainWindow(QMainWindow, form_class_main) :
 
         #### Attributes #### 
 
+
+        # RoiAutoLabelButton 
+
+        # 단순 모듈화 가 아니라 QToolButton 을 customizing 하여 사용 
+        # 아래 사항 은 단순 모듈화 버튼 클릭
+        # self.roiAutoLabelButton.clicked.connect(RoiAutoLabelButton.Buttonclicked)
+
+
         # Image Blending 
         self.alpha = 0.5
 
@@ -55,7 +63,7 @@ class MainWindow(QMainWindow, form_class_main) :
         self.dialog = QFileDialog()
         self.treeView.clicked.connect(self.treeViewImage)
 
-        # Open folde in treeview 
+        # Open folder in treeview 
         self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
 
         # zoom in and out
@@ -97,7 +105,7 @@ class MainWindow(QMainWindow, form_class_main) :
 
         self.resize_image()    
 
-     # method for checking mouse cicks
+     # method for checking mouse clicks
     def getPos(self, event):
 
         print('event.pos', event.pos())

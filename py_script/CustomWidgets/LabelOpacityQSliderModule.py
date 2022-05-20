@@ -3,16 +3,16 @@
 
 
 
-
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+
 
 # LabelOpacitySlider class (custom QSlider), object name : labelOpacitySlider
 # mouse press, move, release, wheel, 방향키(?)
 # 클래스 생성후 초기화 에서 매개변수들 무엇인가??
 
-class LabelOpacitySlider(QSlider) :
+class LabelOpacitySlider(QSlider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._is_drag: bool = False
@@ -50,3 +50,4 @@ class LabelOpacitySlider(QSlider) :
             value = (self.maximum() - self.minimum()) * x / self.width() + self.minimum()
         else:
             return super().mouseReleaseEvent(ev)
+

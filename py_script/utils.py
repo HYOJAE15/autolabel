@@ -27,9 +27,8 @@ def cvtArrayToQImage(array):
         h, w, _ = array.shape
     else :
         raise 
-
+    
     return QImage(array.data, w, h, 3 * w, QImage.Format_RGB888)
-
 
 def blendImageWithColorMap(image, label, palette, alpha):
     """ blend image with color map 

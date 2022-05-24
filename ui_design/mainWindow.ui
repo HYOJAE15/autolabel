@@ -119,6 +119,11 @@
       </property>
       <item>
        <property name="text">
+        <string>배경</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
         <string>균열</string>
        </property>
        <property name="background">
@@ -142,7 +147,7 @@
       </item>
       <item>
        <property name="text">
-        <string>박리</string>
+        <string>철근노출</string>
        </property>
        <property name="foreground">
         <brush brushstyle="NoBrush">
@@ -156,7 +161,7 @@
       </item>
       <item>
        <property name="text">
-        <string>철근노출</string>
+        <string>박리</string>
        </property>
        <property name="foreground">
         <brush brushstyle="NoBrush">

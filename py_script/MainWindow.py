@@ -10,7 +10,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 
-from utils import resource_path, cvtArrayToQImage, blendImageWithColorMap
+from utils import resource_path, cvtArrayToQImage, blendImageWithColorMap, points_between
 
 
 
@@ -34,14 +34,22 @@ class MainWindow(QMainWindow, form_class_main) :
         #### Attributes #### 
        
 
+        # listWidget
+
+        self.listWidget.itemClicked.connect(self.getListWidgetIndex)
+
         # Brush
         
         self.drawing = False
         self.brushSize = 28
-        self.brushColor = Qt.red
+        self.brushColor = Qt.black
         self.lastPoint = QPoint()
         self.ver_scale = 1
         self.hzn_scale = 1
+        self.x = 0 
+        self.y = 0 
+        self.label_class = 0
+
 
         # label opacity
         self.lableOpacitySlider.valueChanged.connect(self.showHorizontalSliderValue)
@@ -75,9 +83,10 @@ class MainWindow(QMainWindow, form_class_main) :
         self.zoomInButton.clicked.connect(self.on_zoom_in)
         self.zoomOutButton.clicked.connect(self.on_zoom_out)
 
-        self.mainImageViewer.mousePressEvent = self.getPos
-        #self.mainImageViewer.mouseMoveEvent = self.getPos
-        #self.mainImageViewer.setMouseTracking = self.getmovingpos
+        # brush tools
+        self.mainImageViewer.mousePressEvent = self.brushPressOrReleasePoint
+        self.mainImageViewer.mouseMoveEvent = self.brushMovingPoint
+        self.mainImageViewer.mouseReleaseEvent = self.brushPressOrReleasePoint
 
     def actionOpenFolderFunction(self) :
         readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder")
@@ -100,29 +109,45 @@ class MainWindow(QMainWindow, form_class_main) :
         labelPath = labelPath.replace( '_leftImg8bit.png', '_gtFine_labelIds.png')
 
         self.label = cv2.imread(labelPath, cv2.IMREAD_UNCHANGED) 
-
         self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
         
         self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
-
         self.scale = self.scrollArea.height() / self.pixmap.height()
 
-        self.resize_image()    
+        self.resize_image()   
+
+    def updateLabelandColormap(self, x, y):
+        
+        self.label[y, x] = self.label_class 
+        self.colormap[y, x] = self.img[y, x] * self.alpha + self.label_palette[self.label_class] * (1-self.alpha)
+        self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+
+    
+    def brushPressOrReleasePoint(self, event):
+
+        scaled_event_pos = QPoint(event.pos().x() / self.scale, event.pos().y() / self.scale)
+        x, y = scaled_event_pos.x(), scaled_event_pos.y()
+        
+        if (self.x != x) or (self.y != y) : 
+
+            self.updateLabelandColormap(x, y)
+            self.resize_image()  
+            self.x, self.y = x, y
 
 
-        # QPixmap을 mainImageViewer 로 설정 및 resize 된 mainImageViewer 로 설정
-        self.image = QPixmap(self.mainImageViewer.size())
-        self.image.fill(Qt.transparent)
-        print(f"self.mainImageViewer.size() {self.mainImageViewer.size()}")
-        print(f"self.image.size() {self.image.size()}")
+    def brushMovingPoint(self, event):
 
+        scaled_event_pos = QPoint(event.pos().x() / self.scale, event.pos().y() / self.scale)
+        x, y = scaled_event_pos.x(), scaled_event_pos.y()
+        
+        if (self.x != x) or (self.y != y) : 
 
-     # method for checking mouse clicks
-    def getPos(self, event):
+            x_btw, y_btw = points_between(self.x, self.y, x, y)
 
-        print('event.pos', event.pos())
-
-
+            self.updateLabelandColormap(x_btw, y_btw)
+            self.resize_image()  
+            self.x, self.y = x, y
+             
 
     def setVerticalScale(self, new_scale):
         self.ver_scale = new_scale
@@ -131,46 +156,6 @@ class MainWindow(QMainWindow, form_class_main) :
     def setHorizontalScale(self, new_scale):
         self.hzn_scale = new_scale
 
-    def mousePressEvent(self, event):
-        #print("mouse press", event.pos())
-        if event.button() == Qt.LeftButton:
-            self.drawing = True
-            scaled_event_pos = QPoint(event.pos().x()*self.hzn_scale, event.pos().y()*self.ver_scale)
-            print(f"click {scaled_event_pos}")
-            self.lastPoint = scaled_event_pos
-    
-    def mouseMoveEvent(self, event):
-        print("mouse move")
-        if (event.buttons() & Qt.LeftButton) & self.drawing:
-            
-            painter = QtGui.QPainter(self)
-            painter.drawPixmap(self.rect(), self.image, self.image.rect())
-            
-            painter.setPen(QPen(self.brushColor, self.brushSize,
-							Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
-            
-            
-
-            scaled_event_pos = QPoint(event.pos().x()*self.hzn_scale, event.pos().y()*self.ver_scale)
-            
-            print(f"move {scaled_event_pos}")
-            painter.drawLine(self.lastPoint, scaled_event_pos)
-
-            painter.end()
-            self.mainImageViewer.setPixmap(QtGui.QPixmap(self.image))
-            
-            # self.mainImageViewer.setPixmap(self.image)
-            self.lastPoint = scaled_event_pos
-
-            
-
-            self.update()
-
-    def mouseReleaseEvent(self, event):
-        print("mouse release")
-        if event.button() == Qt.LeftButton:
-            self.drawing = False
-         
     def on_zoom_in(self):
         self.scale *= 2
         self.resize_image()
@@ -183,20 +168,20 @@ class MainWindow(QMainWindow, form_class_main) :
         size = self.pixmap.size()
         self.scaled_pixmap = self.pixmap.scaled(self.scale * size)
         self.mainImageViewer.setPixmap(self.scaled_pixmap)
-        # self.mainImageViewer.resize(scaled_pixmap.width(), scaled_pixmap.height())
-
 
     def showHorizontalSliderValue(self):
 
         if abs(self.alpha-(self.lableOpacitySlider.value() / 100)) > 0.03 :
-
             self.alpha = self.lableOpacitySlider.value() / 100
-
             self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
-            
             self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
-
             self.resize_image()    
+
+    def getListWidgetIndex (self):
+
+        print(f"self.listWidget.currentRow(){self.listWidget.currentRow()}")
+        
+        self.label_class = self.listWidget.currentRow()
 
 
 if __name__ == "__main__" :

@@ -48,3 +48,31 @@ def blendImageWithColorMap(image, label, palette, alpha):
         color_map[label == idx, :] = image[label == idx, :] * alpha + color * (1-alpha)
 
     return color_map
+
+
+
+def points_between(x1, y1, x2, y2):
+    """
+    coordinate between two points
+    """
+    d0 = x2 - x1
+    d1 = y2 - y1
+    
+    count = max(abs(d1+1), abs(d0+1))
+
+    if d0 == 0:
+        return (
+            np.full(count, x1),
+            np.round(np.linspace(y1, y2, count)).astype(np.int32)
+        )
+
+    if d1 == 0:
+        return (
+            np.round(np.linspace(x1, x2, count)).astype(np.int32),
+            np.full(count, y1),  
+        )
+
+    return (
+        np.round(np.linspace(x1, x2, count)).astype(np.int32),
+        np.round(np.linspace(y1, y2, count)).astype(np.int32)
+    )

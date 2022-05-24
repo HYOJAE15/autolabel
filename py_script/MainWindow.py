@@ -9,9 +9,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+from utils import *
 
-from utils import resource_path, cvtArrayToQImage, blendImageWithColorMap, points_between
+import sys 
+sys.path.append("D:/autolabel/dnn/mmseg")
 
+from mmseg.apis import init_segmentor, inference_segmentor
 
 
 # Select folder "autolabel"
@@ -37,6 +40,13 @@ class MainWindow(QMainWindow, form_class_main) :
         self.y = 0 
         self.label_class = 0
         self.alpha = 0.5
+        self.use_brush = False
+        self.set_roi = False
+
+        config_file = 'D:/autolabel/dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
+        checkpoint_file = 'D:/autolabel/dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
+
+        self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
         """
         Pallete for Concrete damage dataset
@@ -67,9 +77,13 @@ class MainWindow(QMainWindow, form_class_main) :
         self.zoomOutButton.clicked.connect(self.on_zoom_out)
 
         # brush tools
-        self.mainImageViewer.mousePressEvent = self.brushPressOrReleasePoint
-        self.mainImageViewer.mouseMoveEvent = self.brushMovingPoint
-        self.mainImageViewer.mouseReleaseEvent = self.brushPressOrReleasePoint
+        self.brushButton.clicked.connect(self.updateBrushState)
+        self.mainImageViewer.mousePressEvent = self.mousePressEvent
+        self.mainImageViewer.mouseMoveEvent = self.mouseMoveEvent
+        self.mainImageViewer.mouseReleaseEvent = self.mouseReleaseEvent
+
+        # auto label tools 
+        self.roiAutoLabelButton.clicked.connect(self.runRoiAutoLabel)
 
         # listWidget
         self.listWidget.itemClicked.connect(self.getListWidgetIndex)
@@ -112,10 +126,40 @@ class MainWindow(QMainWindow, form_class_main) :
         self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
 
     
+
+    def mousePressEvent(self, event):
+
+        if self.use_brush : 
+            self.brushPressOrReleasePoint(event)
+
+        elif self.set_roi : 
+            self.roiPressPoint(event)
+
+    def mouseMoveEvent(self, event):
+
+        if self.use_brush : 
+            self.brushMovingPoint(event)
+
+        elif self.set_roi : 
+            self.roiMovingPoint(event)
+
+    def mouseReleaseEvent(self, event): 
+
+        if self.use_brush : 
+            self.brushPressOrReleasePoint(event)
+
+        elif self.set_roi : 
+            self.roiReleasePoint(event)
+
+        
+    def updateBrushState(self):
+        
+        self.use_brush = 1 - self.use_brush
+        
+            
     def brushPressOrReleasePoint(self, event):
 
-        scaled_event_pos = QPoint(event.pos().x() / self.scale, event.pos().y() / self.scale)
-        x, y = scaled_event_pos.x(), scaled_event_pos.y()
+        x, y = getScaledPoint(event, self.scale)
         
         if (self.x != x) or (self.y != y) : 
 
@@ -126,8 +170,7 @@ class MainWindow(QMainWindow, form_class_main) :
 
     def brushMovingPoint(self, event):
 
-        scaled_event_pos = QPoint(event.pos().x() / self.scale, event.pos().y() / self.scale)
-        x, y = scaled_event_pos.x(), scaled_event_pos.y()
+        x, y = getScaledPoint(event, self.scale)
         
         if (self.x != x) or (self.y != y) : 
 
@@ -136,11 +179,56 @@ class MainWindow(QMainWindow, form_class_main) :
             self.updateLabelandColormap(x_btw, y_btw)
             self.resize_image()  
             self.x, self.y = x, y
-             
+
+
+    def runRoiAutoLabel(self, event):
+        self.brushButton.setChecked(False)
+        self.use_brush = False
+
+        self.set_roi = True
+        
+    def roiPressPoint(self, event):
+
+        x, y = getScaledPoint(event, self.scale)
+
+        self.rect_start = x, y
+
+    def roiMovingPoint(self, event):
+
+        x, y = getScaledPoint(event, self.scale)
+
+        self.rect_end = x, y
+
+        thickness = 5
+
+        rect_hover = cv2.rectangle(
+            self.colormap.copy(), self.rect_start, self.rect_end, (255, 255, 255), thickness) # , color, thickness, lineType,)
+        self.pixmap = QPixmap(cvtArrayToQImage(rect_hover))
+        self.resize_image()
+        
+
+    def roiReleasePoint(self, event):
+
+        x, y = getScaledPoint(event, self.scale)
+
+        self.rect_end = x, y
+
+        result = inference_segmentor(self.model, self.img[self.rect_start[1]: y, self.rect_start[0]: x, :])
+
+        idx = np.argwhere(result[0] == 1)
+        y_idx, x_idx = idx[:, 0], idx[:, 1]
+        x_idx = x_idx + self.rect_start[0]
+        y_idx = y_idx + self.rect_start[1]
+
+        self.label[y_idx, x_idx] = 1
+        
+        self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
+        self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+        self.resize_image()
+        
 
     def setVerticalScale(self, new_scale):
         self.ver_scale = new_scale
-
 
     def setHorizontalScale(self, new_scale):
         self.hzn_scale = new_scale

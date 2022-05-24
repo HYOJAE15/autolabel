@@ -14,11 +14,8 @@ from utils import resource_path, cvtArrayToQImage, blendImageWithColorMap, point
 
 
 
-
-
 # Select folder "autolabel"
 # MainWindow UI
-# 경로 설정 시 현재 파일 위치가 어떻게 되나?(현재 디렉토리?, 현재 폴더 ?)
 project_ui = '../ui_design/mainWindow.ui'
 
 form = resource_path(project_ui)
@@ -32,29 +29,13 @@ class MainWindow(QMainWindow, form_class_main) :
         self.setupUi(self)
 
         #### Attributes #### 
-       
-
-        # listWidget
-
-        self.listWidget.itemClicked.connect(self.getListWidgetIndex)
-
-        # Brush
-        
-        self.drawing = False
+    
         self.brushSize = 28
-        self.brushColor = Qt.black
-        self.lastPoint = QPoint()
         self.ver_scale = 1
         self.hzn_scale = 1
         self.x = 0 
         self.y = 0 
         self.label_class = 0
-
-
-        # label opacity
-        self.lableOpacitySlider.valueChanged.connect(self.showHorizontalSliderValue)
-
-        # Image Blending 
         self.alpha = 0.5
 
         """
@@ -68,14 +49,16 @@ class MainWindow(QMainWindow, form_class_main) :
             [0, 0, 255], [255, 0, 255]
             ])
 
-        # treeview
+        # treeview setting 
         self.folderPath = None
         self.pathRoot = QtCore.QDir.rootPath()
         self.treeModel = QFileSystemModel(self)
         self.dialog = QFileDialog()
-        self.treeView.clicked.connect(self.treeViewImage)
 
-        # Open folder in treeview 
+        #### Methods ##### 
+
+        # treeview
+        self.treeView.clicked.connect(self.treeViewImage)
         self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
 
         # zoom in and out
@@ -87,6 +70,12 @@ class MainWindow(QMainWindow, form_class_main) :
         self.mainImageViewer.mousePressEvent = self.brushPressOrReleasePoint
         self.mainImageViewer.mouseMoveEvent = self.brushMovingPoint
         self.mainImageViewer.mouseReleaseEvent = self.brushPressOrReleasePoint
+
+        # listWidget
+        self.listWidget.itemClicked.connect(self.getListWidgetIndex)
+
+        # label opacity
+        self.lableOpacitySlider.valueChanged.connect(self.showHorizontalSliderValue)
 
     def actionOpenFolderFunction(self) :
         readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder")

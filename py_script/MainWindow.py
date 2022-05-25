@@ -12,7 +12,8 @@ from PyQt5.QtCore import *
 from utils import *
 
 import sys 
-sys.path.append("D:/autolabel/dnn/mmseg")
+
+sys.path.append("./dnn/mmseg")
 
 from mmseg.apis import init_segmentor, inference_segmentor
 
@@ -43,8 +44,8 @@ class MainWindow(QMainWindow, form_class_main) :
         self.use_brush = False
         self.set_roi = False
 
-        config_file = 'D:/autolabel/dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
-        checkpoint_file = 'D:/autolabel/dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
+        config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
+        checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
 
         self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 

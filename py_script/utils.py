@@ -4,6 +4,23 @@ import sys
 import numpy as np 
 
 from PyQt5.QtGui import QImage
+from PyQt5.QtCore import QPoint
+
+
+def getScaledPoint(event, scale):
+    """Get scaled point coordinate 
+    Args: 
+        event (PyQt5 event)
+        scale (float)
+
+    Returns:
+        x, y (PyQt5 Qpoint)
+    """
+
+    scaled_event_pos = QPoint(event.pos().x() / scale, event.pos().y() / scale)
+    x, y = scaled_event_pos.x(), scaled_event_pos.y()
+
+    return x, y 
 
 def resource_path(relative_path): 
     """ 

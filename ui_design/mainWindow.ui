@@ -315,7 +315,7 @@
        </size>
       </property>
       <property name="checkable">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
      </widget>
     </item>
@@ -342,8 +342,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>496</width>
-             <height>480</height>
+             <width>489</width>
+             <height>465</height>
             </rect>
            </property>
            <property name="layoutDirection">
@@ -478,6 +478,9 @@
        </size>
       </property>
       <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="checked">
        <bool>false</bool>
       </property>
      </widget>
@@ -490,7 +493,7 @@
      <x>0</x>
      <y>0</y>
      <width>944</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menufile">

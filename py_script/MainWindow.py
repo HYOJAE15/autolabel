@@ -17,6 +17,8 @@ sys.path.append("./dnn/mmseg")
 
 from mmseg.apis import init_segmentor, inference_segmentor
 
+# git test - 1
+
 
 # Select folder "autolabel"
 # MainWindow UI

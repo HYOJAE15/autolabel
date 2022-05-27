@@ -17,9 +17,7 @@ sys.path.append("./dnn/mmseg")
 
 from mmseg.apis import init_segmentor, inference_segmentor
 
-# git test - 1
-# git test - 2
-# git test - 3
+
 
 
 

@@ -18,46 +18,184 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="3">
-     <widget class="QToolButton" name="zoomOutButton">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+    <item row="0" column="0" rowspan="4">
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
-      <property name="maximumSize">
-       <size>
-        <width>75</width>
-        <height>75</height>
-       </size>
-      </property>
-      <property name="toolTip">
-       <string>Zoom out</string>
-      </property>
-      <property name="statusTip">
-       <string>zoom tool</string>
-      </property>
-      <property name="text">
-       <string>...</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>../Icon/zoom out.png</normaloff>../Icon/zoom out.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>25</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="checkable">
-       <bool>false</bool>
-      </property>
+      <widget class="QTreeView" name="treeView">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="cursor" stdset="0">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::DragDrop</enum>
+       </property>
+       <property name="defaultDropAction">
+        <enum>Qt::CopyAction</enum>
+       </property>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <property name="horizontalSpacing">
+           <number>6</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QScrollArea" name="scrollArea">
+            <property name="minimumSize">
+             <size>
+              <width>500</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>498</width>
+               <height>480</height>
+              </rect>
+             </property>
+             <property name="layoutDirection">
+              <enum>Qt::LeftToRight</enum>
+             </property>
+             <layout class="QFormLayout" name="formLayout">
+              <property name="sizeConstraint">
+               <enum>QLayout::SetDefaultConstraint</enum>
+              </property>
+              <property name="labelAlignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="formAlignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <item row="0" column="0">
+               <widget class="QLabel" name="mainImageViewer">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <property name="text">
+                 <string>Image</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="text">
+             <string>Label Opacity</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSlider" name="lableOpacitySlider">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="sliderPosition">
+             <number>50</number>
+            </property>
+            <property name="tracking">
+             <bool>true</bool>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
-    <item row="2" column="3">
-     <widget class="QToolButton" name="globalAutoLabelButton">
+    <item row="2" column="1">
+     <widget class="QToolButton" name="roiAutoLabelButton">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -71,7 +209,7 @@
        </size>
       </property>
       <property name="toolTip">
-       <string>Global</string>
+       <string>Region of interest</string>
       </property>
       <property name="statusTip">
        <string>autolabel tool</string>
@@ -81,7 +219,7 @@
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>../Icon/global.png</normaloff>../Icon/global.png</iconset>
+        <normaloff>../Icon/Local.png</normaloff>../Icon/Local.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -90,98 +228,12 @@
        </size>
       </property>
       <property name="checkable">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
      </widget>
     </item>
-    <item row="3" column="2" colspan="2">
-     <widget class="QListWidget" name="listWidget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>15</width>
-        <height>15</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>350</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
-      <item>
-       <property name="text">
-        <string>배경</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>균열</string>
-       </property>
-       <property name="background">
-        <brush brushstyle="NoBrush">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="foreground">
-        <brush brushstyle="NoBrush">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>철근노출</string>
-       </property>
-       <property name="foreground">
-        <brush brushstyle="NoBrush">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>박리</string>
-       </property>
-       <property name="foreground">
-        <brush brushstyle="NoBrush">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>백태</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-    <item row="1" column="2">
-     <widget class="QToolButton" name="zoomInButton">
+    <item row="0" column="1">
+     <widget class="QToolButton" name="brushButton">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -194,18 +246,24 @@
         <height>75</height>
        </size>
       </property>
+      <property name="focusPolicy">
+       <enum>Qt::TabFocus</enum>
+      </property>
       <property name="toolTip">
-       <string>Zoom in</string>
+       <string>Brush</string>
       </property>
       <property name="statusTip">
-       <string>zoom tool</string>
+       <string>BrushTool</string>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
       </property>
       <property name="text">
        <string>...</string>
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>../Icon/zoomin.png</normaloff>../Icon/zoomin.png</iconset>
+        <normaloff>../Icon/brush.png</normaloff>../Icon/brush.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -214,36 +272,11 @@
        </size>
       </property>
       <property name="checkable">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
      </widget>
     </item>
-    <item row="0" column="0" rowspan="4">
-     <widget class="QTreeView" name="treeView">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="cursor" stdset="0">
-       <cursorShape>ArrowCursor</cursorShape>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="dragDropMode">
-       <enum>QAbstractItemView::DragDrop</enum>
-      </property>
-      <property name="defaultDropAction">
-       <enum>Qt::CopyAction</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="3">
+    <item row="0" column="2">
      <widget class="QToolButton" name="eraserButton">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -282,7 +315,7 @@
      </widget>
     </item>
     <item row="2" column="2">
-     <widget class="QToolButton" name="roiAutoLabelButton">
+     <widget class="QToolButton" name="globalAutoLabelButton">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -296,7 +329,7 @@
        </size>
       </property>
       <property name="toolTip">
-       <string>Region of interest</string>
+       <string>Global</string>
       </property>
       <property name="statusTip">
        <string>autolabel tool</string>
@@ -306,7 +339,7 @@
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>../Icon/Local.png</normaloff>../Icon/Local.png</iconset>
+        <normaloff>../Icon/global.png</normaloff>../Icon/global.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -315,134 +348,12 @@
        </size>
       </property>
       <property name="checkable">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
     </item>
-    <item row="0" column="1" rowspan="4">
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <property name="horizontalSpacing">
-         <number>6</number>
-        </property>
-        <item row="0" column="0">
-         <widget class="QScrollArea" name="scrollArea">
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="widgetResizable">
-           <bool>true</bool>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <widget class="QWidget" name="scrollAreaWidgetContents">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>0</y>
-             <width>489</width>
-             <height>465</height>
-            </rect>
-           </property>
-           <property name="layoutDirection">
-            <enum>Qt::LeftToRight</enum>
-           </property>
-           <layout class="QFormLayout" name="formLayout">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
-            </property>
-            <property name="labelAlignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-            <property name="formAlignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-            <item row="0" column="0">
-             <widget class="QLabel" name="mainImageViewer">
-              <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
-              </property>
-              <property name="text">
-               <string>Image</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Plain</enum>
-          </property>
-          <property name="text">
-           <string>Label Opacity</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSlider" name="lableOpacitySlider">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="sliderPosition">
-           <number>50</number>
-          </property>
-          <property name="tracking">
-           <bool>true</bool>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-    <item row="0" column="2">
-     <widget class="QToolButton" name="brushButton">
+    <item row="1" column="1">
+     <widget class="QToolButton" name="zoomInButton">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -456,20 +367,17 @@
        </size>
       </property>
       <property name="toolTip">
-       <string>Brush</string>
+       <string>Zoom in</string>
       </property>
       <property name="statusTip">
-       <string>BrushTool</string>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
+       <string>zoom tool</string>
       </property>
       <property name="text">
        <string>...</string>
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>../Icon/brush.png</normaloff>../Icon/brush.png</iconset>
+        <normaloff>../Icon/zoomin.png</normaloff>../Icon/zoomin.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -478,11 +386,147 @@
        </size>
       </property>
       <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="checked">
        <bool>false</bool>
       </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QToolButton" name="zoomOutButton">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>75</width>
+        <height>75</height>
+       </size>
+      </property>
+      <property name="toolTip">
+       <string>Zoom out</string>
+      </property>
+      <property name="statusTip">
+       <string>zoom tool</string>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../Icon/zoom out.png</normaloff>../Icon/zoom out.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>25</width>
+        <height>25</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1" colspan="2">
+     <widget class="QListWidget" name="listWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>15</width>
+        <height>15</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>350</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <item>
+       <property name="text">
+        <string>배경</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>균열</string>
+       </property>
+       <property name="background">
+        <brush brushstyle="NoBrush">
+         <color alpha="255">
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
+         </color>
+        </brush>
+       </property>
+       <property name="foreground">
+        <brush brushstyle="NoBrush">
+         <color alpha="255">
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
+         </color>
+        </brush>
+       </property>
+       <property name="flags">
+        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>철근노출</string>
+       </property>
+       <property name="foreground">
+        <brush brushstyle="NoBrush">
+         <color alpha="255">
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
+         </color>
+        </brush>
+       </property>
+       <property name="flags">
+        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>박리</string>
+       </property>
+       <property name="foreground">
+        <brush brushstyle="NoBrush">
+         <color alpha="255">
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
+         </color>
+        </brush>
+       </property>
+       <property name="flags">
+        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>백태</string>
+       </property>
+       <property name="flags">
+        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
      </widget>
     </item>
    </layout>
@@ -493,7 +537,7 @@
      <x>0</x>
      <y>0</y>
      <width>944</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menufile">

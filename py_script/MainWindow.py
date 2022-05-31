@@ -1,3 +1,4 @@
+from lib2to3.pytree import type_repr
 import sys
 
 import cv2
@@ -81,13 +82,25 @@ class MainWindow(QMainWindow, form_class_main) :
         self.zoomOutButton.clicked.connect(self.on_zoom_out)
 
         # brush tools
-        self.brushButton.clicked.connect(self.updateBrushState)
+        # Brush size 3개 지정 해서 몇 픽셀 씩 할것이냐 모르겠다
+        self.BrushMenu = QMenu() 
+        self.BrushMenu.addAction("BrushSize_1", self.BrushSize_1)
+        self.BrushMenu.addAction("BrushSize_2", self.BrushSize_2)
+        self.BrushMenu.addAction("BrushSize_3", self.BrushSize_3)
+        self.brushButton.setMenu(self.BrushMenu)
+        self.brushButton.clicked.connect(self.showBrushMenu)
+        # self.brushButton.clicked.connect(self.updateBrushState)
         self.mainImageViewer.mousePressEvent = self.mousePressEvent
         self.mainImageViewer.mouseMoveEvent = self.mouseMoveEvent
         self.mainImageViewer.mouseReleaseEvent = self.mouseReleaseEvent
 
         # auto label tools 
-        self.roiAutoLabelButton.clicked.connect(self.runRoiAutoLabel)
+        self.roiMenu = QMenu()
+        self.roiMenu.addAction("256*256", self.roi256)
+        self.roiMenu.addAction("Set Rectangle", self.roiRec)
+        self.roiAutoLabelButton.setMenu(self.roiMenu)
+        self.roiAutoLabelButton.clicked.connect(self.showRoiMenu)
+        #self.roiAutoLabelButton.clicked.connect(self.runRoiAutoLabel)
 
         # listWidget
         self.listWidget.itemClicked.connect(self.getListWidgetIndex)
@@ -95,9 +108,15 @@ class MainWindow(QMainWindow, form_class_main) :
         # label opacity
         self.lableOpacitySlider.valueChanged.connect(self.showHorizontalSliderValue)
 
+
+        # openFolder 메뉴를 클릭 했을 때 getopenfilename 으로 파일 을 불러오고 그 해당 현재 주소를 가지고 
+        # treeview 생성??
+    
     def actionOpenFolderFunction(self) :
-        readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder")
+        readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder", "./")
+        #readFolderPath = self.dialog.getOpenFileName(self,"select", "./", "Image (*.png *.jpg)" )
         self.folderPath = readFolderPath
+        print(f"self.folderPath {self.folderPath}")
         self.treeModel.setRootPath(self.folderPath)
         self.indexRoot = self.treeModel.index(self.treeModel.rootPath())
         
@@ -129,9 +148,11 @@ class MainWindow(QMainWindow, form_class_main) :
         self.colormap[y, x] = self.img[y, x] * self.alpha + self.label_palette[self.label_class] * (1-self.alpha)
         self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
 
-    
+
 
     def mousePressEvent(self, event):
+
+        print(f"position {event.pos()}")
 
         if self.use_brush : 
             self.brushPressOrReleasePoint(event)
@@ -155,18 +176,50 @@ class MainWindow(QMainWindow, form_class_main) :
         elif self.set_roi : 
             self.roiReleasePoint(event)
 
+    
+        # Brush 사이즈 조절, 좌표 불러올때 해당 좌표 + 몇 Pixel 씩 해주면 가능??
+    def BrushSize_1(self) :
+        #print("BrushSize_1")
+        # use_Brush default 값이 false '0' 이니까 
+        self.brushButton.setChecked(True)
+        self.use_brush = True
+        print(type(self.use_brush))
+        
+
+     
+
+    def BrushSize_2(self) :
+        print("BrushSize_2")
+        self.brushButton.setChecked(True)
+        self.use_brush = True
+        
+
+
+    def BrushSize_3(self):
+        print("BrushSize_3")
+        self.brushButton.setChecked(True)
+        self.use_brush = True
+        
+
+    def showBrushMenu(self) :
+        
+        self.brushButton.showMenu()
         
     def updateBrushState(self):
         
         self.use_brush = 1 - self.use_brush
-        
-            
+        # 자료형에서 int 형과 bool 형 차이 없이 '0'(int)이면 False(bool)인가??
+        print(f"type_self.use_brush {type(self.use_brush)}")
+        print(f"self.use_brush {self.use_brush}")
+        print(f"self.set_roi {self.set_roi}")
+         
+
     def brushPressOrReleasePoint(self, event):
 
         x, y = getScaledPoint(event, self.scale)
         
-        if (self.x != x) or (self.y != y) : 
-
+        if (self.x != x) or (self.y != y) :
+             
             self.updateLabelandColormap(x, y)
             self.resize_image()  
             self.x, self.y = x, y
@@ -185,11 +238,30 @@ class MainWindow(QMainWindow, form_class_main) :
             self.x, self.y = x, y
 
 
-    def runRoiAutoLabel(self, event):
+    def showRoiMenu(self):
+        self.roiAutoLabelButton.showMenu()
+
+    def roi256(self):
+        print("roi256")
         self.brushButton.setChecked(False)
+        self.roiAutoLabelButton.setChecked(True)
+
         self.use_brush = False
 
         self.set_roi = True
+
+
+    def roiRec(self):
+        self.brushButton.setChecked(False)
+        self.roiAutoLabelButton.setChecked(True)
+        print(f"self.use_brush {self.use_brush}")
+
+        self.use_brush = False
+
+        self.set_roi = True
+
+        print(f"self.set_roi {self.set_roi}")
+        print(f"self.use_brush {self.use_brush}")
         
     def roiPressPoint(self, event):
 

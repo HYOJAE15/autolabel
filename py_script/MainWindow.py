@@ -13,13 +13,11 @@ from PyQt5.QtCore import *
 from utils import *
 
 import sys 
+from brushMenuDialog import BrushMenu
 
 sys.path.append("./dnn/mmseg")
 
 from mmseg.apis import init_segmentor, inference_segmentor
-
-
-
 
 
 # Select folder "autolabel"
@@ -29,6 +27,10 @@ project_ui = '../ui_design/mainWindow.ui'
 form = resource_path(project_ui)
 form_class_main = uic.loadUiType(form)[0]
 
+brushMenu_ui = '../ui_design/brushMenuDialog.ui'
+
+form_brushMenu = resource_path(brushMenu_ui)
+form_class_brushMenu = uic.loadUiType(form_brushMenu)[0]
 # Mainwindow class
 
 class MainWindow(QMainWindow, form_class_main) :
@@ -84,11 +86,13 @@ class MainWindow(QMainWindow, form_class_main) :
         # brush tools
         # Brush size 3개 지정 해서 몇 픽셀 씩 할것이냐 모르겠다
         self.BrushMenu = QMenu() 
-        self.BrushMenu.addAction("BrushSize_1", self.BrushSize_1)
-        self.BrushMenu.addAction("BrushSize_2", self.BrushSize_2)
-        self.BrushMenu.addAction("BrushSize_3", self.BrushSize_3)
+        #self.BrushMenu.addAction("BrushSize_1", self.BrushSize_1)
+       #self.BrushMenu.addAction("BrushSize_2", self.BrushSize_2)
+       # self.BrushMenu.addAction("BrushSize_3", self.BrushSize_3)
         self.brushButton.setMenu(self.BrushMenu)
-        self.brushButton.clicked.connect(self.showBrushMenu)
+        #self.brushButton.clicked.connect(self.showBrushMenu)
+        self.brushButton.clicked.connect(self.openBrushDialog)
+
         # self.brushButton.clicked.connect(self.updateBrushState)
         self.mainImageViewer.mousePressEvent = self.mousePressEvent
         self.mainImageViewer.mouseMoveEvent = self.mouseMoveEvent
@@ -112,6 +116,9 @@ class MainWindow(QMainWindow, form_class_main) :
         # openFolder 메뉴를 클릭 했을 때 getopenfilename 으로 파일 을 불러오고 그 해당 현재 주소를 가지고 
         # treeview 생성??
     
+    def openBrushDialog(self):
+        BrushMenu(self)
+
     def actionOpenFolderFunction(self) :
         readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder", "./")
         #readFolderPath = self.dialog.getOpenFileName(self,"select", "./", "Image (*.png *.jpg)" )
@@ -185,20 +192,6 @@ class MainWindow(QMainWindow, form_class_main) :
         self.use_brush = True
         print(type(self.use_brush))
         
-
-     
-
-    def BrushSize_2(self) :
-        print("BrushSize_2")
-        self.brushButton.setChecked(True)
-        self.use_brush = True
-        
-
-
-    def BrushSize_3(self):
-        print("BrushSize_3")
-        self.brushButton.setChecked(True)
-        self.use_brush = True
         
 
     def showBrushMenu(self) :

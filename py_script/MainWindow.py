@@ -1,8 +1,6 @@
 from lib2to3.pytree import type_repr
 import sys
-
 import cv2
-
 import numpy as np 
 
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
@@ -11,9 +9,9 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 from utils import *
+from brushMenuDialog import BrushDialog
 
 import sys 
-
 sys.path.append("./dnn/mmseg")
 
 from mmseg.apis import init_segmentor, inference_segmentor
@@ -37,6 +35,14 @@ class MainWindow(QMainWindow, form_class_main) :
         self.setupUi(self)
 
         #### Attributes #### 
+
+
+        # 메인에서 실행 했으니 메인 클래스의 인스턴스로 생성된 변수 들은 (self.변수) 매서드 내에서 재지정 되도 재지정 값을 저장
+        # 타 모듈 에서 인스턴스로 생성된 변수들은 모듈을 부를때 마다 처음 지정한 인스턴스 변수로 지정 된다.
+        # 타 모듈 에서 인스턴스로 생성된 변수들은 부를 때 마다 처음 값으로 리셋 된다. 
+        # 모듈 부른다(인스턴스 변수 호출 및 각 매서드에서 지정 하면 변수 재지정), 다시부른다(다시 처음 지정값)
+        self.vtest = 1
+        self.eraserButton.clicked.connect(self.fvtest)
     
         self.brushSize = 28
         self.ver_scale = 1
@@ -82,17 +88,23 @@ class MainWindow(QMainWindow, form_class_main) :
         self.zoomOutButton.clicked.connect(self.on_zoom_out)
 
         # brush tools
+
         # Brush size 3개 지정 해서 몇 픽셀 씩 할것이냐 모르겠다
-        self.BrushMenu = QMenu() 
-        self.BrushMenu.addAction("BrushSize_1", self.BrushSize_1)
-        self.BrushMenu.addAction("BrushSize_2", self.BrushSize_2)
-        self.BrushMenu.addAction("BrushSize_3", self.BrushSize_3)
-        self.brushButton.setMenu(self.BrushMenu)
-        self.brushButton.clicked.connect(self.showBrushMenu)
-        # self.brushButton.clicked.connect(self.updateBrushState)
+        #self.BrushMenu = QMenu() 
+        #self.BrushMenu.addAction("BrushSize_1", self.BrushSize_1)
+        #self.BrushMenu.addAction("BrushSize_2", self.BrushSize_2)
+        #self.BrushMenu.addAction("BrushSize_3", self.BrushSize_3)
+        #self.brushButton.setMenu(self.BrushMenu)
+        #self.brushButton.clicked.connect(self.showBrushMenu)
+        #   self.brushButton.clicked.connect(self.updateBrushState) -> 요걸로 use_brush 를 True 로 설정 
+        self.brushButton.clicked.connect(self.openBrushMenuDialog)
         self.mainImageViewer.mousePressEvent = self.mousePressEvent
         self.mainImageViewer.mouseMoveEvent = self.mouseMoveEvent
         self.mainImageViewer.mouseReleaseEvent = self.mouseReleaseEvent
+
+        # 다른 모듈 안의 ui 도 import 시키면 ui 연동 가능??
+        # ㄴㄴ 안됨
+        #self.brush_1.clicked.connect(self.test)
 
         # auto label tools 
         self.roiMenu = QMenu()
@@ -108,10 +120,41 @@ class MainWindow(QMainWindow, form_class_main) :
         # label opacity
         self.lableOpacitySlider.valueChanged.connect(self.showHorizontalSliderValue)
 
+    def fvtest(self):
+        self.vtest = 23
+        print(f"after vtest {self.vtest}")
+
+    def test(self):
+        print("가능")
+    
+    def openBrushMenuDialog(self):
+        # brushMenuDialog 모듈의 BrushDialog 클래스 에 대한 인스턴스를 생성 
+        # BrushDialogClass's Instance
+        # 클래스 에 대한 인스턴스로 받아들인 값을 사용한다
+        BCI = BrushDialog()
+        # exec_ 로 띄워진 화면은 닫기 전 까지는 parent 화면으로 넘어갈수 없다.
+        BCI.exec_()
+        
+        self.BCIValue = BCI.BrushSize
+        self.use_brush = BCI.use_brush
+        print(f"before self.use_brush {self.use_brush}")
+        # 인스턴스로 받아들인 값으로 활용해서 Brush Size 조절 
+        
+
+        # 창을 그냥 닫을 시 오류를 피하는 방법...  오류 피할려면 모두 loop 돌려야 ??
+        if self.BCIValue:
+            self.brushButton.setChecked(True)
+            print(f"self.BCIValue = {self.BCIValue}")
+            print(f"after self.use_brush {self.use_brush}")
+
+        else :
+            self.brushButton.setChecked(False)
+            print("Brush Size 를 선택하지 않았습니다.")        
+
+
 
         # openFolder 메뉴를 클릭 했을 때 getopenfilename 으로 파일 을 불러오고 그 해당 현재 주소를 가지고 
         # treeview 생성??
-    
     def actionOpenFolderFunction(self) :
         readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder", "./")
         #readFolderPath = self.dialog.getOpenFileName(self,"select", "./", "Image (*.png *.jpg)" )
@@ -149,10 +192,13 @@ class MainWindow(QMainWindow, form_class_main) :
         self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
 
 
-
+        # BrushDialog 클래스 인스턴스 에서 받은 값으로 사용 하는대 use_brush 값을 생성한 BCI 로 받는 것이 맞나 ?? 무언가 아닌듯...
+        # 일단 BrushDialog 클래스 인스턴스 로 생성한 BCI 로 지정후 사용 
+        # 아니네 self.use_brush 변수를 다시 지정 해주면 되네
     def mousePressEvent(self, event):
 
         print(f"position {event.pos()}")
+        print(f"after vtest {self.vtest}")
 
         if self.use_brush : 
             self.brushPressOrReleasePoint(event)
@@ -341,4 +387,4 @@ if __name__ == "__main__" :
     app = QApplication(sys.argv)
     myWindow = MainWindow() 
     myWindow.show()
-    app.exec_()
+    sys.exit(app.exec_())

@@ -83,9 +83,12 @@ class MainWindow(QMainWindow, form_class_main) :
         self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
 
         # zoom in and out
+        self.ControlKey = False
         self.scale = 1
         self.zoomInButton.clicked.connect(self.on_zoom_in)
         self.zoomOutButton.clicked.connect(self.on_zoom_out)
+        
+        self.zoomInButton.setShortcut("Ctrl+MouseWheel ")
 
         # brush tools
 
@@ -127,6 +130,7 @@ class MainWindow(QMainWindow, form_class_main) :
     def test(self):
         print("가능")
     
+
     def openBrushMenuDialog(self):
         # brushMenuDialog 모듈의 BrushDialog 클래스 에 대한 인스턴스를 생성 
         # BrushDialogClass's Instance
@@ -363,9 +367,63 @@ class MainWindow(QMainWindow, form_class_main) :
         self.scale /= 2
         self.resize_image()
 
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Control:
+            self.ControlKey = True
+            print(self.ControlKey)
+          
+         
+
+    def keyReleaseEvent(self, event):
+        if event.key() == Qt.Key_Control:
+            self.ControlKey = False
+            print(self.ControlKey)
+           
+        # 줌 땡겨지는 위치를 조절 하자 
+    def wheelEvent(self, event):
+       
+        if self.ControlKey:
+            # mouse angleDelta 가 올리면 1, 내리면 -1 인대 줌인 줌 아웃을 어찌
+            print(f"angleDelta{event.angleDelta().y()/120}")
+            print(type(event.angleDelta().y()))
+            self.mouseWheelAngleDelta = event.angleDelta().y()/120 # ->1
+            
+            if self.mouseWheelAngleDelta > 0 :
+                print("된다!")
+                print(self.mouseWheelAngleDelta+0.1)
+                self.scale *= (self.mouseWheelAngleDelta+0.1)
+                self.resize_image()
+
+            elif self.mouseWheelAngleDelta < 0 :
+                self.scale /= (abs(self.mouseWheelAngleDelta)+0.1)
+                self.resize_image()
+        
+            #self.scale += event.angleDelta().y()/120  
+            #self.resize_image()
+            #print(f"self.scale {self.scale}")
+            #print(event.angleDelta()/1200)
+            #self.scale /= (1.0 + (event.angleDelta() / 1200)) # mouse wheel angleDelta Default = 120
+            #self.resize_image()
+            
+            
+
+            
+        
+    
+
+
+    def ctrl_zoom_out(self, e):
+        if e.key() == Qt.Key_Control :
+            self.ControlKey = True
+
+
     def resize_image(self):
         size = self.pixmap.size()
+        print(f"self.pixmap.size() {self.pixmap.size()}")
         self.scaled_pixmap = self.pixmap.scaled(self.scale * size)
+        
+        print(f"self.scaled_pixmap{self.scaled_pixmap}")
         self.mainImageViewer.setPixmap(self.scaled_pixmap)
 
     def showHorizontalSliderValue(self):

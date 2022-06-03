@@ -88,7 +88,7 @@
                <x>0</x>
                <y>0</y>
                <width>498</width>
-               <height>480</height>
+               <height>465</height>
               </rect>
              </property>
              <property name="layoutDirection">
@@ -449,7 +449,7 @@
        </size>
       </property>
       <property name="layoutDirection">
-       <enum>Qt::RightToLeft</enum>
+       <enum>Qt::LeftToRight</enum>
       </property>
       <item>
        <property name="text">
@@ -537,7 +537,7 @@
      <x>0</x>
      <y>0</y>
      <width>944</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menufile">

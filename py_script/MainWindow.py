@@ -1,4 +1,3 @@
-from lib2to3.pytree import type_repr
 import sys
 import cv2
 import numpy as np 
@@ -9,15 +8,13 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 from utils import *
-from brushMenuDialog import BrushDialog
 
 import sys 
+from brushMenuDialog import BrushMenu
+
 sys.path.append("./dnn/mmseg")
 
 from mmseg.apis import init_segmentor, inference_segmentor
-
-
-
 
 
 # Select folder "autolabel"
@@ -44,7 +41,7 @@ class MainWindow(QMainWindow, form_class_main) :
         self.vtest = 1
         self.eraserButton.clicked.connect(self.fvtest)
     
-        self.brushSize = 28
+        self.brushSize = 1
         self.ver_scale = 1
         self.hzn_scale = 1
         self.x = 0 
@@ -54,10 +51,10 @@ class MainWindow(QMainWindow, form_class_main) :
         self.use_brush = False
         self.set_roi = False
 
-        config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
-        checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
+        # config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
+        # checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
 
-        self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
+        # self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
         """
         Pallete for Concrete damage dataset
@@ -92,22 +89,13 @@ class MainWindow(QMainWindow, form_class_main) :
 
         # brush tools
 
-        # Brush size 3개 지정 해서 몇 픽셀 씩 할것이냐 모르겠다
-        #self.BrushMenu = QMenu() 
-        #self.BrushMenu.addAction("BrushSize_1", self.BrushSize_1)
-        #self.BrushMenu.addAction("BrushSize_2", self.BrushSize_2)
-        #self.BrushMenu.addAction("BrushSize_3", self.BrushSize_3)
-        #self.brushButton.setMenu(self.BrushMenu)
-        #self.brushButton.clicked.connect(self.showBrushMenu)
-        #   self.brushButton.clicked.connect(self.updateBrushState) -> 요걸로 use_brush 를 True 로 설정 
-        self.brushButton.clicked.connect(self.openBrushMenuDialog)
+        self.brushButton.clicked.connect(self.openBrushDialog)
+
         self.mainImageViewer.mousePressEvent = self.mousePressEvent
         self.mainImageViewer.mouseMoveEvent = self.mouseMoveEvent
         self.mainImageViewer.mouseReleaseEvent = self.mouseReleaseEvent
 
-        # 다른 모듈 안의 ui 도 import 시키면 ui 연동 가능??
-        # ㄴㄴ 안됨
-        #self.brush_1.clicked.connect(self.test)
+        
 
         # auto label tools 
         self.roiMenu = QMenu()
@@ -123,13 +111,17 @@ class MainWindow(QMainWindow, form_class_main) :
         # label opacity
         self.lableOpacitySlider.valueChanged.connect(self.showHorizontalSliderValue)
 
-    def fvtest(self):
-        self.vtest = 23
-        print(f"after vtest {self.vtest}")
-
-    def test(self):
-        print("가능")
+        # openFolder 메뉴를 클릭 했을 때 getopenfilename 으로 파일 을 불러오고 그 해당 현재 주소를 가지고 
+        # treeview 생성??
     
+    def openBrushDialog(self):
+        self.use_brush = True
+        self.brushMenu = BrushMenu()
+        self.brushMenu.horizontalSlider.valueChanged.connect(self.setBrushSize)
+        self.brushMenu.exec_()
+    
+    def setBrushSize(self):
+        self.brushSize = self.brushMenu.brushSize
 
     def openBrushMenuDialog(self):
         # brushMenuDialog 모듈의 BrushDialog 클래스 에 대한 인스턴스를 생성 
@@ -155,10 +147,6 @@ class MainWindow(QMainWindow, form_class_main) :
             self.brushButton.setChecked(False)
             print("Brush Size 를 선택하지 않았습니다.")        
 
-
-
-        # openFolder 메뉴를 클릭 했을 때 getopenfilename 으로 파일 을 불러오고 그 해당 현재 주소를 가지고 
-        # treeview 생성??
     def actionOpenFolderFunction(self) :
         readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder", "./")
         #readFolderPath = self.dialog.getOpenFileName(self,"select", "./", "Image (*.png *.jpg)" )
@@ -190,19 +178,45 @@ class MainWindow(QMainWindow, form_class_main) :
         self.resize_image()   
 
     def updateLabelandColormap(self, x, y):
+
+        x, y = self.applyBrushSize(x, y)
+
+        try : 
+            self.label[y, x] = self.label_class 
+            self.colormap[y, x] = self.img[y, x] * self.alpha + self.label_palette[self.label_class] * (1-self.alpha)
+            self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+        except BaseException as e : 
+            print(e)
+
+
+    def applyBrushSize(self, X, Y): 
+
+        circle = False
+
+        width = int(self.brushSize / 2)
         
-        self.label[y, x] = self.label_class 
-        self.colormap[y, x] = self.img[y, x] * self.alpha + self.label_palette[self.label_class] * (1-self.alpha)
-        self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+        return_x = []
+        return_y = []
 
+        _Y, _X = np.mgrid[-width:width, -width:width]
+        _Y, _X = _Y.flatten(), _X.flatten()
+        _Y, _X = np.squeeze(_Y), np.squeeze(_X)
 
-        # BrushDialog 클래스 인스턴스 에서 받은 값으로 사용 하는대 use_brush 값을 생성한 BCI 로 받는 것이 맞나 ?? 무언가 아닌듯...
-        # 일단 BrushDialog 클래스 인스턴스 로 생성한 BCI 로 지정후 사용 
-        # 아니네 self.use_brush 변수를 다시 지정 해주면 되네
+        if circle :
+            dist = [np.sqrt(_x**2 + _y**2) for _x, _y in zip(_Y, _X)]
+            _Y =  [_y for idx, _y in enumerate(_Y) if dist[idx] < width]
+            _X = [_x for idx, _x in enumerate(_X) if dist[idx] < width]
+            _X, _Y = np.array(_X), np.array(_Y)
+
+        for x, y in zip(X, Y):
+            _x = x + _X
+            _y = y + _Y
+            return_x += _x.tolist()
+            return_y += _y.tolist()
+
+        return return_x, return_y
+
     def mousePressEvent(self, event):
-
-        print(f"position {event.pos()}")
-        print(f"after vtest {self.vtest}")
 
         if self.use_brush : 
             self.brushPressOrReleasePoint(event)
@@ -225,30 +239,6 @@ class MainWindow(QMainWindow, form_class_main) :
 
         elif self.set_roi : 
             self.roiReleasePoint(event)
-
-    
-        # Brush 사이즈 조절, 좌표 불러올때 해당 좌표 + 몇 Pixel 씩 해주면 가능??
-    def BrushSize_1(self) :
-        #print("BrushSize_1")
-        # use_Brush default 값이 false '0' 이니까 
-        self.brushButton.setChecked(True)
-        self.use_brush = True
-        print(type(self.use_brush))
-        
-
-     
-
-    def BrushSize_2(self) :
-        print("BrushSize_2")
-        self.brushButton.setChecked(True)
-        self.use_brush = True
-        
-
-
-    def BrushSize_3(self):
-        print("BrushSize_3")
-        self.brushButton.setChecked(True)
-        self.use_brush = True
         
 
     def showBrushMenu(self) :
@@ -258,7 +248,8 @@ class MainWindow(QMainWindow, form_class_main) :
     def updateBrushState(self):
         
         self.use_brush = 1 - self.use_brush
-        # 자료형에서 int 형과 bool 형 차이 없이 '0'(int)이면 False(bool)인가??
+        # 효재: 자료형에서 int 형과 bool 형 차이 없이 '0'(int)이면 False(bool)인가??
+        # 병현: 응 맞아 ㅋㅋ 
         print(f"type_self.use_brush {type(self.use_brush)}")
         print(f"self.use_brush {self.use_brush}")
         print(f"self.set_roi {self.set_roi}")
@@ -270,7 +261,7 @@ class MainWindow(QMainWindow, form_class_main) :
         
         if (self.x != x) or (self.y != y) :
              
-            self.updateLabelandColormap(x, y)
+            self.updateLabelandColormap([x], [y])
             self.resize_image()  
             self.x, self.y = x, y
 
@@ -409,21 +400,11 @@ class MainWindow(QMainWindow, form_class_main) :
             
 
             
-        
-    
-
-
-    def ctrl_zoom_out(self, e):
-        if e.key() == Qt.Key_Control :
-            self.ControlKey = True
 
 
     def resize_image(self):
         size = self.pixmap.size()
-        print(f"self.pixmap.size() {self.pixmap.size()}")
         self.scaled_pixmap = self.pixmap.scaled(self.scale * size)
-        
-        print(f"self.scaled_pixmap{self.scaled_pixmap}")
         self.mainImageViewer.setPixmap(self.scaled_pixmap)
 
     def showHorizontalSliderValue(self):

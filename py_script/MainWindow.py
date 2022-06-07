@@ -38,8 +38,6 @@ class MainWindow(QMainWindow, form_class_main) :
         # 타 모듈 에서 인스턴스로 생성된 변수들은 모듈을 부를때 마다 처음 지정한 인스턴스 변수로 지정 된다.
         # 타 모듈 에서 인스턴스로 생성된 변수들은 부를 때 마다 처음 값으로 리셋 된다. 
         # 모듈 부른다(인스턴스 변수 호출 및 각 매서드에서 지정 하면 변수 재지정), 다시부른다(다시 처음 지정값)
-        self.vtest = 1
-        self.eraserButton.clicked.connect(self.fvtest)
     
         self.brushSize = 1
         self.ver_scale = 1
@@ -50,11 +48,12 @@ class MainWindow(QMainWindow, form_class_main) :
         self.alpha = 0.5
         self.use_brush = False
         self.set_roi = False
+        self.set_roi_256 = False
 
-        # config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
-        # checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
+        config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
+        checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
 
-        # self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
+        self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
         """
         Pallete for Concrete damage dataset
@@ -84,8 +83,6 @@ class MainWindow(QMainWindow, form_class_main) :
         self.scale = 1
         self.zoomInButton.clicked.connect(self.on_zoom_in)
         self.zoomOutButton.clicked.connect(self.on_zoom_out)
-        
-        self.zoomInButton.setShortcut("Ctrl+MouseWheel ")
 
         # brush tools
 
@@ -111,14 +108,23 @@ class MainWindow(QMainWindow, form_class_main) :
         # label opacity
         self.lableOpacitySlider.valueChanged.connect(self.showHorizontalSliderValue)
 
-        # openFolder 메뉴를 클릭 했을 때 getopenfilename 으로 파일 을 불러오고 그 해당 현재 주소를 가지고 
-        # treeview 생성??
     
     def openBrushDialog(self):
-        self.use_brush = True
         self.brushMenu = BrushMenu()
-        self.brushMenu.horizontalSlider.valueChanged.connect(self.setBrushSize)
         self.brushMenu.exec_()
+        self.use_brush = self.brushMenu.use_brush
+        self.brushSize = self.brushMenu.brushSize
+
+        if self.use_brush:
+            self.brushButton.setChecked(True)
+            self.roiAutoLabelButton.setChecked(False)
+            #self.brushMenu.horizontalSlider.setValue(self.brushSize)
+            #self.brushMenu.lineEdit.setText(f'{self.brushSize} px')
+            self.brushMenu.horizontalSlider.valueChanged.connect(self.setBrushSize)
+        
+        
+        
+        
     
     def setBrushSize(self):
         self.brushSize = self.brushMenu.brushSize
@@ -224,6 +230,10 @@ class MainWindow(QMainWindow, form_class_main) :
         elif self.set_roi : 
             self.roiPressPoint(event)
 
+        elif self.set_roi_256 :
+            self.roi256PressPoint(event)
+
+
     def mouseMoveEvent(self, event):
 
         if self.use_brush : 
@@ -240,19 +250,6 @@ class MainWindow(QMainWindow, form_class_main) :
         elif self.set_roi : 
             self.roiReleasePoint(event)
         
-
-    def showBrushMenu(self) :
-        
-        self.brushButton.showMenu()
-        
-    def updateBrushState(self):
-        
-        self.use_brush = 1 - self.use_brush
-        # 효재: 자료형에서 int 형과 bool 형 차이 없이 '0'(int)이면 False(bool)인가??
-        # 병현: 응 맞아 ㅋㅋ 
-        print(f"type_self.use_brush {type(self.use_brush)}")
-        print(f"self.use_brush {self.use_brush}")
-        print(f"self.set_roi {self.set_roi}")
          
 
     def brushPressOrReleasePoint(self, event):
@@ -282,6 +279,8 @@ class MainWindow(QMainWindow, form_class_main) :
     def showRoiMenu(self):
         self.roiAutoLabelButton.showMenu()
 
+
+        # 256*256 크기의 구간 설정 상자를 만든다, 
     def roi256(self):
         print("roi256")
         self.brushButton.setChecked(False)
@@ -289,7 +288,9 @@ class MainWindow(QMainWindow, form_class_main) :
 
         self.use_brush = False
 
-        self.set_roi = True
+        self.set_roi = False
+
+        self.set_roi_256 = True
 
 
     def roiRec(self):
@@ -300,9 +301,49 @@ class MainWindow(QMainWindow, form_class_main) :
         self.use_brush = False
 
         self.set_roi = True
+        
+        self.set_roi_256 = False
 
         print(f"self.set_roi {self.set_roi}")
         print(f"self.use_brush {self.use_brush}")
+
+        # 클릭 점을 중앙점 으로 256*256 사이즈 상자 나오게 
+    def roi256PressPoint(self, event):
+
+        x, y = getScaledPoint(event, self.scale)
+
+        #self.rect_center = x, y
+
+        self.rect_start = x-128, y-128
+
+        self.rect_end = x+128, y+128
+
+        thickness = 2
+
+            
+        rect_hover = cv2.rectangle(
+            self.colormap.copy(), self.rect_start, self.rect_end, (255, 255, 255), thickness)
+
+        self.pixmap = QPixmap(cvtArrayToQImage(rect_hover))
+        self.resize_image()
+
+        print(f"rectangle size {self.rect_start, self.rect_end}")
+
+        result = inference_segmentor(self.model, self.img[self.rect_start[1]: y, self.rect_start[0]: x, :])
+
+        idx = np.argwhere(result[0] == 1)
+        y_idx, x_idx = idx[:, 0], idx[:, 1]
+        x_idx = x_idx + self.rect_start[0]
+        y_idx = y_idx + self.rect_start[1]
+
+        self.label[y_idx, x_idx] = 1
+        
+        self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
+        self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+        self.pixmap = QPixmap(cvtArrayToQImage(rect_hover))
+        self.resize_image()
+
+
         
     def roiPressPoint(self, event):
 

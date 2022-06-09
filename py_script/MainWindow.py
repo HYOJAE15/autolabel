@@ -10,6 +10,7 @@ from PyQt5.QtCore import *
 from utils import *
 
 import sys 
+from time import sleep
 from brushMenuDialog import BrushMenu
 
 sys.path.append("./dnn/mmseg")
@@ -257,7 +258,10 @@ class MainWindow(QMainWindow, form_class_main) :
         x, y = getScaledPoint(event, self.scale)
         
         if (self.x != x) or (self.y != y) :
-             
+
+            print(f"original pos {event.pos()}") 
+            print(f"original Qpoint {QPoint(event.pos())}")
+            print(f"sclaed pos {event.pos()/self.scale}")
             self.updateLabelandColormap([x], [y])
             self.resize_image()  
             self.x, self.y = x, y
@@ -280,7 +284,7 @@ class MainWindow(QMainWindow, form_class_main) :
         self.roiAutoLabelButton.showMenu()
 
 
-        # 256*256 크기의 구간 설정 상자를 만든다, 
+       
     def roi256(self):
         print("roi256")
         self.brushButton.setChecked(False)
@@ -307,29 +311,32 @@ class MainWindow(QMainWindow, form_class_main) :
         print(f"self.set_roi {self.set_roi}")
         print(f"self.use_brush {self.use_brush}")
 
-        # 클릭 점을 중앙점 으로 256*256 사이즈 상자 나오게 
+        
     def roi256PressPoint(self, event):
 
         x, y = getScaledPoint(event, self.scale)
-
-        #self.rect_center = x, y
-
         self.rect_start = x-128, y-128
-
         self.rect_end = x+128, y+128
 
-        thickness = 2
-
-            
-        rect_hover = cv2.rectangle(
+        thickness = 2    
+        rect_256 = cv2.rectangle(
             self.colormap.copy(), self.rect_start, self.rect_end, (255, 255, 255), thickness)
 
-        self.pixmap = QPixmap(cvtArrayToQImage(rect_hover))
-        self.resize_image()
-
         print(f"rectangle size {self.rect_start, self.rect_end}")
+        self.pixmap = QPixmap(cvtArrayToQImage(rect_256))
+        self.resize_image()
+        print("네모")
 
-        result = inference_segmentor(self.model, self.img[self.rect_start[1]: y, self.rect_start[0]: x, :])
+
+        result = inference_segmentor(self.model, self.img[self.rect_start[1]: self.rect_end[1],
+                                        self.rect_start[0]: self.rect_end[0], :])
+        #cv2.imshow("cropimage", self.img[self.rect_start[1]: self.rect_end[1],
+                                        #self.rect_start[0]: self.rect_end[0], :])
+        #cv2.waitKey(0)
+        #cv2.destroyWindow
+        print(self.img[self.rect_start[1]: self.rect_end[1],
+                                        self.rect_start[0]: self.rect_end[0], :].shape)
+        
 
         idx = np.argwhere(result[0] == 1)
         y_idx, x_idx = idx[:, 0], idx[:, 1]
@@ -340,8 +347,11 @@ class MainWindow(QMainWindow, form_class_main) :
         
         self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
         self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
-        self.pixmap = QPixmap(cvtArrayToQImage(rect_hover))
-        self.resize_image()
+        self.resize_image
+
+        # 설정된 영역을 보여주면서 autolabeling 결과물을 볼 수있게 구현 필요 
+        # 지금은 엉망 
+        
 
 
         

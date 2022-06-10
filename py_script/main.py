@@ -8,7 +8,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 from utils.utils import *
-from brushMenuDialog import BrushMenu
 
 from components.dialogs.brushMenuDialog import BrushMenu
 from components.dialogs.newProjectDialog import newProjectDialog
@@ -155,7 +154,7 @@ class MainWindow(QMainWindow, form_class_main,
         
 
         # 이게 왜 안되지?? 
-        #self.brushMenu.move(event.globalX(), event.globalY())
+        # self.brushMenu.move(event.globalX(), event.globalY())
 
         self.brushMenu.show()
 

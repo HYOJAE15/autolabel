@@ -11,10 +11,6 @@ from PyQt5.QtCore import *
 
 from utils.utils import *
 
-# Select folder "autolabel"
-# MainWindow UI
-
-# Mainwindow class
 class TreeView() :
     def __init__(self) :
         super().__init__()

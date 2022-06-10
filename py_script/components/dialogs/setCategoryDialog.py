@@ -18,8 +18,4 @@ class setCategoryDialog(QDialog, form_class_brushMenu):
         self.cancelButton.clicked.connect(self.close)
 
 
-if __name__ == "__main__" :
-    app = QApplication(sys.argv)
-    myWindow = setCategoryDialog() 
-    myWindow.show()
-    app.exec_()
+

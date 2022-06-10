@@ -14,7 +14,7 @@ class BrushMenu(QDialog, form_class_brushMenu):
         self.setupUi(self)
 
         self.use_brush = True
-        self.brushSize = 1
+        self.brushSize = 2
         #self.horizontalSlider.setValue(self.brushSize)
         self.lineEdit.setText(f'{self.brushSize} px')
         self.horizontalSlider.valueChanged.connect(self.changeSliderValueText)

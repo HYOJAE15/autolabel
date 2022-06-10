@@ -129,6 +129,40 @@
     <string>Category Information</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="addRowButton">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>300</y>
+     <width>31</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../Icon/plus.png</normaloff>../Icon/plus.png</iconset>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="deleteRowButton">
+   <property name="geometry">
+    <rect>
+     <x>64</x>
+     <y>300</y>
+     <width>31</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../Icon/minus.png</normaloff>../Icon/minus.png</iconset>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

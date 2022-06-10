@@ -121,16 +121,19 @@ class MainWindow(QMainWindow, form_class_main,
   
         self.use_brush = True
         self.brushMenu = BrushMenu()
+
         self.initBrushTools()
         
         self.brushMenu.move(event.globalX(), event.globalY())
 
         self.brushMenu.exec_()
 
+
     def initBrushTools(self):
         self.brushMenu.horizontalSlider.valueChanged.connect(self.setBrushSize)
         self.brushMenu.circleButton.clicked.connect(self.setBrushCircle)
         self.brushMenu.squareButton.clicked.connect(self.setBrushSquare)
+        
 
     def setBrushCircle(self):
         self.circle = True
@@ -143,9 +146,13 @@ class MainWindow(QMainWindow, form_class_main,
         
         self.newProjectDialog = newProjectDialog()
         self.newProjectDialog.nextButton.clicked.connect(self.openCategoryInfoDialog)
+        self.newProjectDialog.folderButton.clicked.connect(self.setFolderPath)
 
-        self.newProjectDialog.exec()
+        self.newProjectDialog.exec_()
 
+    def setFolderPath(self):
+        readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder", "./")
+        self.newProjectDialog.folderPath.setMarkdown(readFolderPath)
 
     def openCategoryInfoDialog(self, event):
 

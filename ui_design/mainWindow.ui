@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1143</width>
-    <height>590</height>
+    <width>944</width>
+    <height>575</height>
    </rect>
   </property>
   <property name="focusPolicy">
@@ -15,13 +15,6 @@
   </property>
   <property name="windowTitle">
    <string>Auto-labeling</string>
-  </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>../Icon/chalk.png</normaloff>../Icon/chalk.png</iconset>
-  </property>
-  <property name="animated">
-   <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -94,8 +87,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>625</width>
-               <height>480</height>
+               <width>498</width>
+               <height>465</height>
               </rect>
              </property>
              <property name="layoutDirection">
@@ -199,6 +192,44 @@
         </item>
        </layout>
       </widget>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QToolButton" name="roiAutoLabelButton">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>75</width>
+        <height>75</height>
+       </size>
+      </property>
+      <property name="toolTip">
+       <string>Region of interest</string>
+      </property>
+      <property name="statusTip">
+       <string>autolabel tool</string>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../Icon/Local.png</normaloff>../Icon/Local.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>25</width>
+        <height>25</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
      </widget>
     </item>
     <item row="0" column="1">
@@ -397,44 +428,6 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
-     <widget class="QToolButton" name="roiAutoLabelButton">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>75</width>
-        <height>75</height>
-       </size>
-      </property>
-      <property name="toolTip">
-       <string>Region of interest</string>
-      </property>
-      <property name="statusTip">
-       <string>autolabel tool</string>
-      </property>
-      <property name="text">
-       <string>...</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>../Icon/Local.png</normaloff>../Icon/Local.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>25</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
     <item row="3" column="1" colspan="2">
      <widget class="QListWidget" name="listWidget">
       <property name="sizePolicy">
@@ -462,15 +455,6 @@
        <property name="text">
         <string>배경</string>
        </property>
-       <property name="background">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>240</red>
-          <green>240</green>
-          <blue>240</blue>
-         </color>
-        </brush>
-       </property>
        <property name="flags">
         <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
        </property>
@@ -480,18 +464,18 @@
         <string>균열</string>
        </property>
        <property name="background">
-        <brush brushstyle="SolidPattern">
+        <brush brushstyle="NoBrush">
          <color alpha="255">
-          <red>240</red>
-          <green>240</green>
-          <blue>240</blue>
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
          </color>
         </brush>
        </property>
        <property name="foreground">
         <brush brushstyle="NoBrush">
          <color alpha="255">
-          <red>255</red>
+          <red>0</red>
           <green>0</green>
           <blue>0</blue>
          </color>
@@ -505,20 +489,11 @@
        <property name="text">
         <string>철근노출</string>
        </property>
-       <property name="background">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>240</red>
-          <green>240</green>
-          <blue>240</blue>
-         </color>
-        </brush>
-       </property>
        <property name="foreground">
         <brush brushstyle="NoBrush">
          <color alpha="255">
-          <red>255</red>
-          <green>255</green>
+          <red>0</red>
+          <green>0</green>
           <blue>0</blue>
          </color>
         </brush>
@@ -531,21 +506,12 @@
        <property name="text">
         <string>박리</string>
        </property>
-       <property name="background">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>240</red>
-          <green>240</green>
-          <blue>240</blue>
-         </color>
-        </brush>
-       </property>
        <property name="foreground">
         <brush brushstyle="NoBrush">
          <color alpha="255">
           <red>0</red>
           <green>0</green>
-          <blue>255</blue>
+          <blue>0</blue>
          </color>
         </brush>
        </property>
@@ -556,24 +522,6 @@
       <item>
        <property name="text">
         <string>백태</string>
-       </property>
-       <property name="background">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>240</red>
-          <green>240</green>
-          <blue>240</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="foreground">
-        <brush brushstyle="NoBrush">
-         <color alpha="255">
-          <red>255</red>
-          <green>0</green>
-          <blue>255</blue>
-         </color>
-        </brush>
        </property>
        <property name="flags">
         <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
@@ -588,7 +536,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1143</width>
+     <width>944</width>
      <height>26</height>
     </rect>
    </property>
@@ -596,9 +544,6 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionNewProject"/>
-    <addaction name="actionOpenProject"/>
-    <addaction name="separator"/>
     <addaction name="actionOpenFolder"/>
     <addaction name="actionSave"/>
    </widget>
@@ -619,16 +564,6 @@
   <action name="actionOpenFolder">
    <property name="text">
     <string>Open Folder</string>
-   </property>
-  </action>
-  <action name="actionNewProject">
-   <property name="text">
-    <string>New Project</string>
-   </property>
-  </action>
-  <action name="actionOpenProject">
-   <property name="text">
-    <string>Open Project</string>
    </property>
   </action>
  </widget>

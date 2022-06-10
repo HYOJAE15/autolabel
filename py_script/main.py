@@ -7,40 +7,45 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from utils import *
-
-import sys 
-from time import sleep
+from utils.utils import *
 from brushMenuDialog import BrushMenu
 
-sys.path.append("./dnn/mmseg")
+from components.dialogs.brushMenuDialog import BrushMenu
+from components.dialogs.newProjectDialog import newProjectDialog
+from components.dialogs.setCategoryDialog import setCategoryDialog
 
+from components.buttons.autoLabelButton import AutoLabelButton
+from components.buttons.brushButton import BrushButton
+from components.buttons.zoomButton import ZoomButton
+
+from components.actions.actionFile import ActionFile
+
+from components.widgets.treeView import TreeView
+
+
+sys.path.append("./dnn/mmseg")
 from mmseg.apis import init_segmentor, inference_segmentor
 
 
 # Select folder "autolabel"
 # MainWindow UI
-project_ui = '../ui_design/mainWindow.ui'
+project_ui = '../../ui_design/mainWindow.ui'
 
 form = resource_path(project_ui)
 form_class_main = uic.loadUiType(form)[0]
 
 # Mainwindow class
 
-class MainWindow(QMainWindow, form_class_main) :
+class MainWindow(QMainWindow, form_class_main,
+    AutoLabelButton, BrushButton, ZoomButton,
+    ActionFile, TreeView) :
     def __init__(self) :
         super().__init__()
         self.setupUi(self)
 
         #### Attributes #### 
 
-
-        # 메인에서 실행 했으니 메인 클래스의 인스턴스로 생성된 변수 들은 (self.변수) 매서드 내에서 재지정 되도 재지정 값을 저장
-        # 타 모듈 에서 인스턴스로 생성된 변수들은 모듈을 부를때 마다 처음 지정한 인스턴스 변수로 지정 된다.
-        # 타 모듈 에서 인스턴스로 생성된 변수들은 부를 때 마다 처음 값으로 리셋 된다. 
-        # 모듈 부른다(인스턴스 변수 호출 및 각 매서드에서 지정 하면 변수 재지정), 다시부른다(다시 처음 지정값)
-    
-        self.brushSize = 1
+        self.brushSize = 2
         self.ver_scale = 1
         self.hzn_scale = 1
         self.x = 0 
@@ -50,6 +55,7 @@ class MainWindow(QMainWindow, form_class_main) :
         self.use_brush = False
         self.set_roi = False
         self.set_roi_256 = False
+        self.circle = True
 
         config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
         checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
@@ -73,122 +79,54 @@ class MainWindow(QMainWindow, form_class_main) :
         self.treeModel = QFileSystemModel(self)
         self.dialog = QFileDialog()
 
-        #### Methods ##### 
 
-        # treeview
+        # 1. Menu
         self.treeView.clicked.connect(self.treeViewImage)
         self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
 
-        # handMoveTool
-        self.hKey = False
-        self.icon = QPixmap("./Icon/square.png")
-        self.scaled_icon = self.icon.scaled(QSize(5, 5), Qt.KeepAspectRatio)
-        self.custom_cursor = QCursor(self.scaled_icon)
-
-        # zoom in and out
+        # 2. zoom in and out
         self.ControlKey = False
         self.scale = 1
         self.zoomInButton.clicked.connect(self.on_zoom_in)
         self.zoomOutButton.clicked.connect(self.on_zoom_out)
 
-        # brush tools
-
+        # 3. brush tools
         self.brushButton.clicked.connect(self.openBrushDialog)
 
+        # 4. main Image Viewer
         self.mainImageViewer.mousePressEvent = self.mousePressEvent
         self.mainImageViewer.mouseMoveEvent = self.mouseMoveEvent
         self.mainImageViewer.mouseReleaseEvent = self.mouseReleaseEvent
 
-        
+        # 5. listWidget
+        self.listWidget.itemClicked.connect(self.getListWidgetIndex)
 
-        # auto label tools 
+        # 6. label opacity
+        self.lableOpacitySlider.valueChanged.connect(self.showHorizontalSliderValue)
+
+        # 7. auto label tools 
         self.roiMenu = QMenu()
         self.roiMenu.addAction("256*256", self.roi256)
         self.roiMenu.addAction("Set Rectangle", self.roiRec)
         self.roiAutoLabelButton.setMenu(self.roiMenu)
         self.roiAutoLabelButton.clicked.connect(self.showRoiMenu)
         #self.roiAutoLabelButton.clicked.connect(self.runRoiAutoLabel)
-
-        # listWidget
-        self.listWidget.itemClicked.connect(self.getListWidgetIndex)
-
-        # label opacity
-        self.lableOpacitySlider.valueChanged.connect(self.showHorizontalSliderValue)
-
     
-    def openBrushDialog(self):
-        self.brushMenu = BrushMenu()
-        self.brushMenu.exec_()
-        self.use_brush = self.brushMenu.use_brush
-        self.brushSize = self.brushMenu.brushSize
+        # 8. handMoveTool
+        self.hKey = False
+        self.icon = QPixmap("./Icon/square.png")
+        self.scaled_icon = self.icon.scaled(QSize(5, 5), Qt.KeepAspectRatio)
+        self.custom_cursor = QCursor(self.scaled_icon)
 
-        if self.use_brush:
-            self.brushButton.setChecked(True)
-            self.roiAutoLabelButton.setChecked(False)
-            #self.brushMenu.horizontalSlider.setValue(self.brushSize)
-            #self.brushMenu.lineEdit.setText(f'{self.brushSize} px')
-            self.brushMenu.horizontalSlider.valueChanged.connect(self.setBrushSize)
-        
-        
-        
-        
-    
-    def setBrushSize(self):
-        self.brushSize = self.brushMenu.brushSize
 
-    def openBrushMenuDialog(self):
-        # brushMenuDialog 모듈의 BrushDialog 클래스 에 대한 인스턴스를 생성 
-        # BrushDialogClass's Instance
-        # 클래스 에 대한 인스턴스로 받아들인 값을 사용한다
-        BCI = BrushDialog()
-        # exec_ 로 띄워진 화면은 닫기 전 까지는 parent 화면으로 넘어갈수 없다.
-        BCI.exec_()
-        
-        self.BCIValue = BCI.BrushSize
-        self.use_brush = BCI.use_brush
-        print(f"before self.use_brush {self.use_brush}")
-        # 인스턴스로 받아들인 값으로 활용해서 Brush Size 조절 
-        
 
-        # 창을 그냥 닫을 시 오류를 피하는 방법...  오류 피할려면 모두 loop 돌려야 ??
-        if self.BCIValue:
-            self.brushButton.setChecked(True)
-            print(f"self.BCIValue = {self.BCIValue}")
-            print(f"after self.use_brush {self.use_brush}")
 
-        else :
-            self.brushButton.setChecked(False)
-            print("Brush Size 를 선택하지 않았습니다.")        
+    #### Methods ##### 
 
-    def actionOpenFolderFunction(self) :
-        readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder", "./")
-        #readFolderPath = self.dialog.getOpenFileName(self,"select", "./", "Image (*.png *.jpg)" )
-        self.folderPath = readFolderPath
-        print(f"self.folderPath {self.folderPath}")
-        self.treeModel.setRootPath(self.folderPath)
-        self.indexRoot = self.treeModel.index(self.treeModel.rootPath())
-        
-        self.treeView.setModel(self.treeModel)
-        self.treeView.setRootIndex(self.indexRoot)
 
-    def treeViewImage(self, index) :
-
-        indexItem = self.treeModel.index(index.row(), 0, index.parent())
-        imgPath = self.treeModel.filePath(indexItem)
-       
-        self.img = cv2.imread(imgPath) 
-        self.img = cv2.cvtColor(self.img, cv2.COLOR_BGR2RGB) 
-
-        labelPath = imgPath.replace('/leftImg8bit/', '/gtFine/')
-        labelPath = labelPath.replace( '_leftImg8bit.png', '_gtFine_labelIds.png')
-
-        self.label = cv2.imread(labelPath, cv2.IMREAD_UNCHANGED) 
-        self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
-        
-        self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
-        self.scale = self.scrollArea.height() / self.pixmap.height()
-
-        self.resize_image()   
+    ######################## 
+    ### Image Processing ###
+    ########################
 
     def updateLabelandColormap(self, x, y):
 
@@ -201,33 +139,55 @@ class MainWindow(QMainWindow, form_class_main) :
         except BaseException as e : 
             print(e)
 
+    ########################### 
+    ### Mouse Event Handler ###
+    ###########################
 
-    def applyBrushSize(self, X, Y): 
+    def openBrushDialog(self, event):
 
-        circle = False
+        if hasattr(self, 'brushMenu'):
+            self.brushMenu.close()
+  
+        self.use_brush = True
+        self.brushMenu = BrushMenu()
 
-        width = int(self.brushSize / 2)
+        self.initBrushTools()
         
-        return_x = []
-        return_y = []
 
-        _Y, _X = np.mgrid[-width:width, -width:width]
-        _Y, _X = _Y.flatten(), _X.flatten()
-        _Y, _X = np.squeeze(_Y), np.squeeze(_X)
+        # 이게 왜 안되지?? 
+        #self.brushMenu.move(event.globalX(), event.globalY())
 
-        if circle :
-            dist = [np.sqrt(_x**2 + _y**2) for _x, _y in zip(_Y, _X)]
-            _Y =  [_y for idx, _y in enumerate(_Y) if dist[idx] < width]
-            _X = [_x for idx, _x in enumerate(_X) if dist[idx] < width]
-            _X, _Y = np.array(_X), np.array(_Y)
+        self.brushMenu.show()
 
-        for x, y in zip(X, Y):
-            _x = x + _X
-            _y = y + _Y
-            return_x += _x.tolist()
-            return_y += _y.tolist()
+    def initBrushTools(self):
+        self.brushMenu.horizontalSlider.valueChanged.connect(self.setBrushSize)
+        self.brushMenu.circleButton.clicked.connect(self.setBrushCircle)
+        self.brushMenu.squareButton.clicked.connect(self.setBrushSquare)
 
-        return return_x, return_y
+    def setBrushCircle(self):
+        self.circle = True
+
+    def setBrushSquare(self):
+        self.circle = False
+
+    def openNewProjectDialog(self, event):
+        
+        self.newProjectDialog = newProjectDialog()
+        self.newProjectDialog.nextButton.clicked.connect(self.openCategoryInfoDialog)
+        self.newProjectDialog.folderButton.clicked.connect(self.setFolderPath)
+
+        self.newProjectDialog.exec_()
+
+    def setFolderPath(self):
+        readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder", "./")
+        self.newProjectDialog.folderPath.setMarkdown(readFolderPath)
+
+    def openCategoryInfoDialog(self, event):
+
+        self.newProjectDialog.close()
+
+        self.setCategoryDialog = setCategoryDialog()
+        self.setCategoryDialog.exec_()
 
     def mousePressEvent(self, event):
 
@@ -256,149 +216,36 @@ class MainWindow(QMainWindow, form_class_main) :
 
         elif self.set_roi : 
             self.roiReleasePoint(event)
-        
-         
-
-    def brushPressOrReleasePoint(self, event):
-
-        x, y = getScaledPoint(event, self.scale)
-        
-        if (self.x != x) or (self.y != y) :
-
-            print(f"original pos {event.pos()}") 
-            print(f"original Qpoint {QPoint(event.pos())}")
-            print(f"sclaed pos {event.pos()/self.scale}")
-            self.updateLabelandColormap([x], [y])
-            self.resize_image()  
-            self.x, self.y = x, y
-
-
-    def brushMovingPoint(self, event):
-
-        x, y = getScaledPoint(event, self.scale)
-        
-        if (self.x != x) or (self.y != y) : 
-
-            x_btw, y_btw = points_between(self.x, self.y, x, y)
-
-            self.updateLabelandColormap(x_btw, y_btw)
-            self.resize_image()  
-            self.x, self.y = x, y
-
-
+    
     def showRoiMenu(self):
         self.roiAutoLabelButton.showMenu()
 
 
+    
+
+
+
+
+
+
+
+
+    
+    
+
+    
+
+
+   
+
+    
+
+
        
-    def roi256(self):
-        print("roi256")
-        self.brushButton.setChecked(False)
-        self.roiAutoLabelButton.setChecked(True)
-
-        self.use_brush = False
-
-        self.set_roi = False
-
-        self.set_roi_256 = True
-
-
-    def roiRec(self):
-        self.brushButton.setChecked(False)
-        self.roiAutoLabelButton.setChecked(True)
-        print(f"self.use_brush {self.use_brush}")
-
-        self.use_brush = False
-
-        self.set_roi = True
-        
-        self.set_roi_256 = False
-
-        print(f"self.set_roi {self.set_roi}")
-        print(f"self.use_brush {self.use_brush}")
+    
 
         
-    def roi256PressPoint(self, event):
-
-        x, y = getScaledPoint(event, self.scale)
-        self.rect_start = x-128, y-128
-        self.rect_end = x+128, y+128
-
-        thickness = 2    
-        rect_256 = cv2.rectangle(
-            self.colormap.copy(), self.rect_start, self.rect_end, (255, 255, 255), thickness)
-
-        print(f"rectangle size {self.rect_start, self.rect_end}")
-        self.pixmap = QPixmap(cvtArrayToQImage(rect_256))
-        self.resize_image()
-        print("네모")
-
-
-        result = inference_segmentor(self.model, self.img[self.rect_start[1]: self.rect_end[1],
-                                        self.rect_start[0]: self.rect_end[0], :])
-        #cv2.imshow("cropimage", self.img[self.rect_start[1]: self.rect_end[1],
-                                        #self.rect_start[0]: self.rect_end[0], :])
-        #cv2.waitKey(0)
-        #cv2.destroyWindow
-        print(self.img[self.rect_start[1]: self.rect_end[1],
-                                        self.rect_start[0]: self.rect_end[0], :].shape)
-        
-
-        idx = np.argwhere(result[0] == 1)
-        y_idx, x_idx = idx[:, 0], idx[:, 1]
-        x_idx = x_idx + self.rect_start[0]
-        y_idx = y_idx + self.rect_start[1]
-
-        self.label[y_idx, x_idx] = 1
-        
-        self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
-        self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
-        self.resize_image
-
-        # 설정된 영역을 보여주면서 autolabeling 결과물을 볼 수있게 구현 필요 
-        # 지금은 엉망 
-        
-
-
-        
-    def roiPressPoint(self, event):
-
-        x, y = getScaledPoint(event, self.scale)
-
-        self.rect_start = x, y
-
-    def roiMovingPoint(self, event):
-
-        x, y = getScaledPoint(event, self.scale)
-
-        self.rect_end = x, y
-
-        thickness = 5
-
-        rect_hover = cv2.rectangle(
-            self.colormap.copy(), self.rect_start, self.rect_end, (255, 255, 255), thickness) # , color, thickness, lineType,)
-        self.pixmap = QPixmap(cvtArrayToQImage(rect_hover))
-        self.resize_image()
-        
-
-    def roiReleasePoint(self, event):
-
-        x, y = getScaledPoint(event, self.scale)
-
-        self.rect_end = x, y
-
-        result = inference_segmentor(self.model, self.img[self.rect_start[1]: y, self.rect_start[0]: x, :])
-
-        idx = np.argwhere(result[0] == 1)
-        y_idx, x_idx = idx[:, 0], idx[:, 1]
-        x_idx = x_idx + self.rect_start[0]
-        y_idx = y_idx + self.rect_start[1]
-
-        self.label[y_idx, x_idx] = 1
-        
-        self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
-        self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
-        self.resize_image()
+    
         
 
     def setVerticalScale(self, new_scale):
@@ -407,13 +254,7 @@ class MainWindow(QMainWindow, form_class_main) :
     def setHorizontalScale(self, new_scale):
         self.hzn_scale = new_scale
 
-    def on_zoom_in(self):
-        self.scale *= 2
-        self.resize_image()
-
-    def on_zoom_out(self):
-        self.scale /= 2
-        self.resize_image()
+    
 
 
     def keyPressEvent(self, event):

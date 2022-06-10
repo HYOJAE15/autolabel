@@ -1,6 +1,5 @@
-import sys
 
-from PyQt5 import uic, QtCore
+from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from utils.utils import *
 
@@ -29,12 +28,11 @@ class BrushMenu(QDialog, form_class_brushMenu):
             number += 1
         self.brushSize = number
         self.lineEdit.setText(f'{number} px')
-        self.horizontalSlider.setValue(number)
+        self.horizontalSlider.setValue(number) 
+            
 
     def keyPressEvent(self, event):
-        # print(event.key())
-        if event.key() in [16777220, 16777221] : 
-            # print('Enter pressed')
+        if event.key() in [16777220, 16777221] : # enter key code
             self.changeBrushSizeAndSliderBar()
         else:
             super().keyPressEvent(event)
@@ -54,4 +52,5 @@ class BrushMenu(QDialog, form_class_brushMenu):
 
             self.brushSize = number
             self.lineEdit.setText(f'{self.brushSize} px') 
-            self.horizontalSlider.setValue(self.brushSize)
+            self.horizontalSlider.setValue(self.brushSize) 
+

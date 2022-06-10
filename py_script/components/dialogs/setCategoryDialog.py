@@ -16,6 +16,19 @@ class setCategoryDialog(QDialog, form_class_brushMenu):
         self.show()
 
         self.cancelButton.clicked.connect(self.close)
+        self.addRowButton.clicked.connect(self.addRow)
+        self.deleteRowButton.clicked.connect(self.deleteRow)
+
+    def addRow(self):
+        rowPosition = self.tableWidget.rowCount()
+        self.tableWidget.insertRow(rowPosition) #insert new row
+
+
+    def deleteRow(self):
+        self.tableWidget.removeRow(self.tableWidget.currentRow())
+        
+
+
 
 
 if __name__ == "__main__" :

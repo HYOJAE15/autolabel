@@ -79,6 +79,12 @@ class MainWindow(QMainWindow, form_class_main) :
         self.treeView.clicked.connect(self.treeViewImage)
         self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
 
+        # handMoveTool
+        self.hKey = False
+        self.icon = QPixmap("./Icon/square.png")
+        self.scaled_icon = self.icon.scaled(QSize(5, 5), Qt.KeepAspectRatio)
+        self.custom_cursor = QCursor(self.scaled_icon)
+
         # zoom in and out
         self.ControlKey = False
         self.scale = 1
@@ -411,16 +417,34 @@ class MainWindow(QMainWindow, form_class_main) :
 
 
     def keyPressEvent(self, event):
+
+            # zoom
         if event.key() == Qt.Key_Control:
             self.ControlKey = True
+            QApplication.setOverrideCursor(self.custom_cursor)
             print(self.ControlKey)
+
+            # handMove
+        elif event.key() == Qt.Key_H:
+            self.hKey = True
+            QApplication.setOverrideCursor(self.custom_cursor)
+            print(self.hKey)
           
          
 
     def keyReleaseEvent(self, event):
+
+            # zoom
         if event.key() == Qt.Key_Control:
             self.ControlKey = False
+            QApplication.setOverrideCursor(Qt.ArrowCursor)
             print(self.ControlKey)
+
+            # handMove
+        elif event.key() == Qt.Key_H:
+            self.hKey = False
+            QApplication.setOverrideCursor(Qt.ArrowCursor)
+            print(self.hKey)
            
         # 줌 땡겨지는 위치를 조절 하자 
     def wheelEvent(self, event):

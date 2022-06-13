@@ -5,8 +5,9 @@ from setuptools import find_packages, setup
 
 setup(
     name='Auto Labeling Toolkit',
-    version='0.1.0',
+    version='0.1.2',
+    include_package_data=True,
     packages=find_packages(where='py_script'),
     package_dir={'': 'py_script'},
-    py_modules=[splitext(basename(path))[0] for path in glob('py_script/*.py')],
+    py_modules=[splitext(basename(path))[0] for path in glob('py_script/*.py')+glob('py_script/*/*.py')+glob('py_script/*/*/*.py')],
 )

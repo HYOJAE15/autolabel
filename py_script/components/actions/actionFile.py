@@ -33,6 +33,7 @@ class ActionFile :
         
         self.treeView.setModel(self.treeModel)
         self.treeView.setRootIndex(self.indexRoot)
+        
 
     def actionCreateProject(self):
         pass

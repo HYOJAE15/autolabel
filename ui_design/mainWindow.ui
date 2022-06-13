@@ -475,110 +475,6 @@
         <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
        </property>
       </item>
-      <item>
-       <property name="text">
-        <string>균열</string>
-       </property>
-       <property name="background">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>240</red>
-          <green>240</green>
-          <blue>240</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="foreground">
-        <brush brushstyle="NoBrush">
-         <color alpha="255">
-          <red>255</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="flags">
-        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>철근노출</string>
-       </property>
-       <property name="background">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>240</red>
-          <green>240</green>
-          <blue>240</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="foreground">
-        <brush brushstyle="NoBrush">
-         <color alpha="255">
-          <red>255</red>
-          <green>255</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="flags">
-        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>박리</string>
-       </property>
-       <property name="background">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>240</red>
-          <green>240</green>
-          <blue>240</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="foreground">
-        <brush brushstyle="NoBrush">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>255</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="flags">
-        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>백태</string>
-       </property>
-       <property name="background">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>240</red>
-          <green>240</green>
-          <blue>240</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="foreground">
-        <brush brushstyle="NoBrush">
-         <color alpha="255">
-          <red>255</red>
-          <green>0</green>
-          <blue>255</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="flags">
-        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
      </widget>
     </item>
    </layout>
@@ -598,6 +494,7 @@
     </property>
     <addaction name="actionNewProject"/>
     <addaction name="actionOpenProject"/>
+    <addaction name="actionAddNewImages"/>
     <addaction name="separator"/>
     <addaction name="actionOpenFolder"/>
     <addaction name="actionSave"/>
@@ -629,6 +526,11 @@
   <action name="actionOpenProject">
    <property name="text">
     <string>Open Project</string>
+   </property>
+  </action>
+  <action name="actionAddNewImages">
+   <property name="text">
+    <string>Add New Images</string>
    </property>
   </action>
  </widget>

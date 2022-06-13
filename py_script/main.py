@@ -51,6 +51,7 @@ class MainWindow(QMainWindow, form_class_main,
         self.use_brush = False
         self.set_roi = False
         self.circle = True
+        self.ctrl_pressed = False
  
         """
         Pallete for Concrete damage dataset
@@ -72,9 +73,12 @@ class MainWindow(QMainWindow, form_class_main,
         # 1. Menu
         
         self.treeView.clicked.connect(self.treeViewImage)
+        # self.treeView.keyPressEvent.connect(self.pressKey)
+    
         self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
-
-        self.actionNewProject.triggered.connect(self.openNewProjectDialog)
+        self.actionAddNewImages.triggered.connect(self.addNewImages)
+        self.actionNewProject.triggered.connect(self.createNewProjectDialog)
+        self.actionOpenProject.triggered.connect(self.openExistingProject)
         # self.actionCreate_a_Project.triggered.connect(self.openCreateProjectDialog)
 
         # 2. Zoom in and out
@@ -96,11 +100,80 @@ class MainWindow(QMainWindow, form_class_main,
         # 6. label opacity
         self.lableOpacitySlider.valueChanged.connect(self.showHorizontalSliderValue)
 
+    def keyPressEvent(self, event):
+
+        if event.key() == 16777223: # delete key
+            print(event.key())
+            
+            print(self.labelPath)
+            print(self.imgPath)
+            os.remove(self.imgPath)
+            os.remove(self.labelPath)
+
+        elif event.key() == 16777249 : # ctrl key
+            self.ctrl_pressed = True
+
+        elif event.key() == 83 : # ctrl key
+            if self.ctrl_pressed : 
+                cv2.imwrite(self.labelPath, self.label) 
+                print('Save')
+
+        else :
+            print(event.key())
+
+
+    def keyReleaseEvent(self, event):
+
+        if event.key() == 16777249 : # ctrl key
+            self.ctrl_pressed = False
+
+            
+        
+        
+
 
 
     ######################## 
     ### Image Processing ###
     ########################
+
+
+    def addNewImages(self):
+        readFilePath = self.dialog.getOpenFileNames(
+            caption="Add images to current working directory", filter="Images (*.png *.jpg)"
+            )
+        images = readFilePath[0]
+
+        print(os.path.dirname(images[0]))
+        print(self.treeModel.rootPath())
+
+        if self.treeModel.rootPath() in os.path.dirname(images[0]):
+            return None
+
+        # check if images are from same folder 
+        img_save_folder = os.path.dirname(self.imgPath)
+        img_label_folder = os.path.dirname(self.labelPath)
+        
+        for img in images:
+            
+            # temp_img = cv2.imread(img, cv2.IMREAD_UNCHANGED) 
+            temp_img = cv2.imdecode(np.fromfile(img, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+
+            img_filename = os.path.basename(img)
+            img_filename = img_filename.replace(' ', '')
+            img_filename = img_filename.replace('.jpg', '.png')
+            img_filename = img_filename.replace('.png', '_leftImg8bit.png')
+
+            img_gt_filename = img_filename.replace( '_leftImg8bit.png', '_gtFine_labelIds.png')
+            gt = np.zeros((temp_img.shape[0], temp_img.shape[1]), dtype=np.uint8)
+
+            cv2.imwrite(os.path.join(img_save_folder, img_filename), temp_img)
+            cv2.imwrite(os.path.join(img_label_folder, img_gt_filename), gt)
+            # check file extension -> change extension to png 
+            # create corresponding label file 
+
+            print(os.path.join(img_save_folder, img_filename))
+        
 
     def updateLabelandColormap(self, x, y):
 
@@ -144,8 +217,41 @@ class MainWindow(QMainWindow, form_class_main,
     def setBrushSquare(self):
         self.circle = False
 
+    def openExistingProject(self):
 
-    def openNewProjectDialog(self, event):
+        readFilePath = self.dialog.getOpenFileName(
+            caption="Select Folder", filter="*.hdr"
+            )
+        hdr_path = readFilePath[0]
+
+        folderPath = os.path.dirname(hdr_path)
+
+        self.treeModel.setRootPath(os.path.join(folderPath, 'leftImg8bit'))
+        self.indexRoot = self.treeModel.index(self.treeModel.rootPath())
+        self.treeView.setModel(self.treeModel)
+        self.treeView.setRootIndex(self.indexRoot)
+        
+
+        with open(hdr_path) as f:
+            hdr = json.load(f)
+
+        self.listWidget.clear()
+
+        self.label_palette = []
+
+        for idx, cat in enumerate(hdr['categories']):
+            name, color = cat[0], cat[1]
+            color = json.loads(color)
+            self.listWidget.addItem(name)
+            iconPixmap = QPixmap(20, 20)
+            iconPixmap.fill(QColor(color[0], color[1], color[2]))
+            self.listWidget.item(idx).setIcon(QIcon(iconPixmap))
+            self.label_palette.append(color)
+
+        self.label_palette = np.array(self.label_palette)
+
+
+    def createNewProjectDialog(self, event):
 
         self.new_project_info = {}
         
@@ -178,51 +284,21 @@ class MainWindow(QMainWindow, form_class_main,
     def createProjectHeader(self):
 
         path = self.new_project_info['folder_path']
-        exist_file = any(os.path.isfile(os.path.join(path, i)) for i in os.listdir(path))
-        exist_subfolder = any(os.walk(self.new_project_info['folder_path']))
+        n_row = self.setCategoryDialog.tableWidget.rowCount()
 
-        dirs_list = []
+        self.new_project_info['categories'] = []
 
-        for root, dirs, files in os.walk(path):
-            dirs_list.append(dirs)
-
-        folder_struct = {}
-        folder_struct['Cityscapes'] = [
-            ['gtFine', 'leftImg8bit'], ['test', 'train', 'val'], [], [], [], ['test', 'train', 'val'], [], [], [],
-        ]
-
-        if folder_struct['Cityscapes'] == dirs_list:
-            print("Folder Structure is same as Cityscape's.")
-
-
-        if exist_file or exist_subfolder:
-            # "Raise Warning Message Here."
-
-            QMessageBox.about(self, "Folder is NOT empty.", "Please select an empty folder to create a new project.")
-            self.setCategoryDialog.close()
-            return None 
-
-
-
-        with open(os.path.join(self.new_project_info['folder_path'], 'project_info.hdr'), 'w') as fp:
+        for i in range(n_row):
+            self.new_project_info['categories'].append(
+                [
+                    self.setCategoryDialog.tableWidget.item(i, 0).text(),
+                    self.setCategoryDialog.tableWidget.item(i, 2).text()
+                ]
+                )
+            
+        with open(os.path.join(path, 'project_info.hdr'), 'w') as fp:
             json.dump(self.new_project_info, fp)
 
-        
-        
-
-        # check if subfolder exists
-            # if True 
-            # check directory structure
-                # if following standard folder structure
-                    # import existing images from folders 
-                # elif not following standard folder structure
-                    # abort 
-            # else 
-                # create standard folder structure
-        # read dataset information (e.i. number of images)
-            # create 
-        # number of image 
-        pass
 
 
     def mousePressEvent(self, event):

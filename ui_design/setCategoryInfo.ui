@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>508</width>
+    <width>453</width>
     <height>351</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
     <rect>
      <x>30</x>
      <y>70</y>
-     <width>451</width>
+     <width>401</width>
      <height>211</height>
     </rect>
    </property>
@@ -27,7 +27,7 @@
    </attribute>
    <row>
     <property name="text">
-     <string>No. 0</string>
+     <string>1</string>
     </property>
    </row>
    <column>
@@ -88,7 +88,7 @@
   <widget class="QPushButton" name="cancelButton">
    <property name="geometry">
     <rect>
-     <x>400</x>
+     <x>350</x>
      <y>300</y>
      <width>81</width>
      <height>31</height>
@@ -98,10 +98,10 @@
     <string>Cancel</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="createButton">
    <property name="geometry">
     <rect>
-     <x>320</x>
+     <x>270</x>
      <y>300</y>
      <width>71</width>
      <height>31</height>

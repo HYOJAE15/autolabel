@@ -182,7 +182,7 @@ p, li { white-space: pre-wrap; }
     <string>Project Name:</string>
    </property>
   </widget>
-  <widget class="QTextEdit" name="textEdit_2">
+  <widget class="QTextEdit" name="textProjectName">
    <property name="geometry">
     <rect>
      <x>34</x>

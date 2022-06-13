@@ -2,6 +2,9 @@
 import sys
 import cv2
 import sys
+import json
+import os
+
 
 import numpy as np 
 
@@ -48,7 +51,7 @@ class MainWindow(QMainWindow, form_class_main,
         self.use_brush = False
         self.set_roi = False
         self.circle = True
-
+ 
         """
         Pallete for Concrete damage dataset
 
@@ -126,7 +129,7 @@ class MainWindow(QMainWindow, form_class_main,
         
         self.brushMenu.move(event.globalX(), event.globalY())
 
-        self.brushMenu.exec_()
+        self.brushMenu.show()
 
 
     def initBrushTools(self):
@@ -143,23 +146,83 @@ class MainWindow(QMainWindow, form_class_main,
 
 
     def openNewProjectDialog(self, event):
+
+        self.new_project_info = {}
         
         self.newProjectDialog = newProjectDialog()
+        self.newProjectDialog.textProjectName.textChanged.connect(self.setProjectName)
         self.newProjectDialog.nextButton.clicked.connect(self.openCategoryInfoDialog)
         self.newProjectDialog.folderButton.clicked.connect(self.setFolderPath)
 
-        self.newProjectDialog.exec_()
+        self.newProjectDialog.exec()
+
+    def setProjectName(self):
+        self.new_project_info['project_name'] = self.newProjectDialog.textProjectName.toPlainText()
+
 
     def setFolderPath(self):
+
         readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder", "./")
         self.newProjectDialog.folderPath.setMarkdown(readFolderPath)
+        self.new_project_info['folder_path'] = readFolderPath
+
 
     def openCategoryInfoDialog(self, event):
 
         self.newProjectDialog.close()
 
         self.setCategoryDialog = setCategoryDialog()
-        self.setCategoryDialog.exec_()
+        self.setCategoryDialog.createButton.clicked.connect(self.createProjectHeader)
+        self.setCategoryDialog.exec()
+
+    def createProjectHeader(self):
+
+        path = self.new_project_info['folder_path']
+        exist_file = any(os.path.isfile(os.path.join(path, i)) for i in os.listdir(path))
+        exist_subfolder = any(os.walk(self.new_project_info['folder_path']))
+
+        dirs_list = []
+
+        for root, dirs, files in os.walk(path):
+            dirs_list.append(dirs)
+
+        folder_struct = {}
+        folder_struct['Cityscapes'] = [
+            ['gtFine', 'leftImg8bit'], ['test', 'train', 'val'], [], [], [], ['test', 'train', 'val'], [], [], [],
+        ]
+
+        if folder_struct['Cityscapes'] == dirs_list:
+            print("Folder Structure is same as Cityscape's.")
+
+
+        if exist_file or exist_subfolder:
+            # "Raise Warning Message Here."
+
+            QMessageBox.about(self, "Folder is NOT empty.", "Please select an empty folder to create a new project.")
+            self.setCategoryDialog.close()
+            return None 
+
+
+
+        with open(os.path.join(self.new_project_info['folder_path'], 'project_info.hdr'), 'w') as fp:
+            json.dump(self.new_project_info, fp)
+
+        
+        
+
+        # check if subfolder exists
+            # if True 
+            # check directory structure
+                # if following standard folder structure
+                    # import existing images from folders 
+                # elif not following standard folder structure
+                    # abort 
+            # else 
+                # create standard folder structure
+        # read dataset information (e.i. number of images)
+            # create 
+        # number of image 
+        pass
 
 
     def mousePressEvent(self, event):
@@ -212,7 +275,6 @@ class MainWindow(QMainWindow, form_class_main,
 
     def roiReleasePoint(self, event):
         pass
-
     #     x, y = getScaledPoint(event, self.scale)
 
     #     self.rect_end = x, y

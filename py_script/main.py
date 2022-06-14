@@ -415,13 +415,15 @@ class MainWindow(QMainWindow, form_class_main,
             # zoom
         if event.key() == Qt.Key_Control:
             self.ControlKey = False
-            QApplication.setOverrideCursor(Qt.ArrowCursor)
+            #QApplication.setOverrideCursor(Qt.ArrowCursor)
+            QApplication.restoreOverrideCursor()
             print(self.ControlKey)
 
             # handMove
         elif event.key() == Qt.Key_H:
             self.hKey = False
-            QApplication.setOverrideCursor(Qt.ArrowCursor)
+            #QApplication.setOverrideCursor(Qt.ArrowCursor)
+            QApplication.restoreOverrideCursor()
             print(self.hKey)
            
         # 줌 땡겨지는 위치를 조절 하자 

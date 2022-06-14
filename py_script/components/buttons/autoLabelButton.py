@@ -59,14 +59,7 @@ class AutoLabelButton :
         self.rect_start = x-128, y-128
         self.rect_end = x+128, y+128
 
-        thickness = 2    
-        rect_256 = cv2.rectangle(
-            self.colormap.copy(), self.rect_start, self.rect_end, (255, 255, 255), thickness)
-
-        print(f"rectangle size {self.rect_start, self.rect_end}")
-        self.pixmap = QPixmap(cvtArrayToQImage(rect_256))
-        self.resize_image()
-        print("네모")
+        
 
 
         result = inference_segmentor(self.model, self.img[self.rect_start[1]: self.rect_end[1],
@@ -88,7 +81,21 @@ class AutoLabelButton :
         
         self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
         self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
-        self.resize_image
+        self.resize_image()
+
+
+
+        thickness = 2    
+        rect_256 = cv2.rectangle(
+            self.colormap.copy(), self.rect_start, self.rect_end, (255, 255, 255), thickness)
+
+        print(f"rectangle size {self.rect_start, self.rect_end}")
+        self.pixmap = QPixmap(cvtArrayToQImage(rect_256))
+        self.resize_image()
+        print("네모")
+
+
+
 
         # 설정된 영역을 보여주면서 autolabeling 결과물을 볼 수있게 구현 필요 
         # 지금은 엉망 

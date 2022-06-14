@@ -1,5 +1,10 @@
 import sys
 import cv2
+
+import json
+import os
+
+
 import numpy as np 
 
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
@@ -55,12 +60,15 @@ class MainWindow(QMainWindow, form_class_main,
         self.set_roi = False
         self.set_roi_256 = False
         self.circle = True
+        self.ctrl_pressed = False
 
         config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
         checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
 
         self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
+        
+ 
         """
         Pallete for Concrete damage dataset
 
@@ -81,10 +89,18 @@ class MainWindow(QMainWindow, form_class_main,
 
         # 1. Menu
         self.treeView.clicked.connect(self.treeViewImage)
+        # self.treeView.keyPressEvent.connect(self.pressKey)
+    
         self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
 
         # 2. zoom in and out
         self.ControlKey = False
+        self.actionAddNewImages.triggered.connect(self.addNewImages)
+        self.actionNewProject.triggered.connect(self.createNewProjectDialog)
+        self.actionOpenProject.triggered.connect(self.openExistingProject)
+        # self.actionCreate_a_Project.triggered.connect(self.openCreateProjectDialog)
+
+        # 2. Zoom in and out
         self.scale = 1
         self.zoomInButton.clicked.connect(self.on_zoom_in)
         self.zoomOutButton.clicked.connect(self.on_zoom_out)
@@ -121,11 +137,80 @@ class MainWindow(QMainWindow, form_class_main,
 
 
     #### Methods ##### 
+    def keyPressEvent(self, event):
+
+        if event.key() == 16777223: # delete key
+            print(event.key())
+            
+            print(self.labelPath)
+            print(self.imgPath)
+            os.remove(self.imgPath)
+            os.remove(self.labelPath)
+
+        elif event.key() == 16777249 : # ctrl key
+            self.ctrl_pressed = True
+
+        elif event.key() == 83 : # ctrl key
+            if self.ctrl_pressed : 
+                cv2.imwrite(self.labelPath, self.label) 
+                print('Save')
+
+        else :
+            print(event.key())
+
+
+    def keyReleaseEvent(self, event):
+
+        if event.key() == 16777249 : # ctrl key
+            self.ctrl_pressed = False
+
+            
+        
+        
+
 
 
     ######################## 
     ### Image Processing ###
     ########################
+
+
+    def addNewImages(self):
+        readFilePath = self.dialog.getOpenFileNames(
+            caption="Add images to current working directory", filter="Images (*.png *.jpg)"
+            )
+        images = readFilePath[0]
+
+        print(os.path.dirname(images[0]))
+        print(self.treeModel.rootPath())
+
+        if self.treeModel.rootPath() in os.path.dirname(images[0]):
+            return None
+
+        # check if images are from same folder 
+        img_save_folder = os.path.dirname(self.imgPath)
+        img_label_folder = os.path.dirname(self.labelPath)
+        
+        for img in images:
+            
+            # temp_img = cv2.imread(img, cv2.IMREAD_UNCHANGED) 
+            temp_img = cv2.imdecode(np.fromfile(img, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+
+            img_filename = os.path.basename(img)
+            img_filename = img_filename.replace(' ', '')
+            img_filename = img_filename.replace('.jpg', '.png')
+            img_filename = img_filename.replace('.png', '_leftImg8bit.png')
+
+            img_gt_filename = img_filename.replace( '_leftImg8bit.png', '_gtFine_labelIds.png')
+            gt = np.zeros((temp_img.shape[0], temp_img.shape[1]), dtype=np.uint8)
+
+            cv2.imwrite(os.path.join(img_save_folder, img_filename), temp_img)
+            cv2.imwrite(os.path.join(img_label_folder, img_gt_filename), gt)
+            # check file extension -> change extension to png 
+            # create corresponding label file 
+
+            print(os.path.join(img_save_folder, img_filename))
+        
 
     def updateLabelandColormap(self, x, y):
 
@@ -170,23 +255,91 @@ class MainWindow(QMainWindow, form_class_main,
         self.circle = False
 
     def openNewProjectDialog(self, event):
-        
+
         self.newProjectDialog = newProjectDialog()
+        self.newProjectDialog.textProjectName.textChanged.connect(self.setProjectName)
         self.newProjectDialog.nextButton.clicked.connect(self.openCategoryInfoDialog)
         self.newProjectDialog.folderButton.clicked.connect(self.setFolderPath)
 
-        self.newProjectDialog.exec_()
+        self.newProjectDialog.exec()
+
+    def openExistingProject(self):
+
+        readFilePath = self.dialog.getOpenFileName(
+            caption="Select Folder", filter="*.hdr"
+            )
+        hdr_path = readFilePath[0]
+
+        folderPath = os.path.dirname(hdr_path)
+
+        self.treeModel.setRootPath(os.path.join(folderPath, 'leftImg8bit'))
+        self.indexRoot = self.treeModel.index(self.treeModel.rootPath())
+        self.treeView.setModel(self.treeModel)
+        self.treeView.setRootIndex(self.indexRoot)
+        
+
+        with open(hdr_path) as f:
+            hdr = json.load(f)
+
+        self.listWidget.clear()
+
+        self.label_palette = []
+
+        for idx, cat in enumerate(hdr['categories']):
+            name, color = cat[0], cat[1]
+            color = json.loads(color)
+            self.listWidget.addItem(name)
+            iconPixmap = QPixmap(20, 20)
+            iconPixmap.fill(QColor(color[0], color[1], color[2]))
+            self.listWidget.item(idx).setIcon(QIcon(iconPixmap))
+            self.label_palette.append(color)
+
+        self.label_palette = np.array(self.label_palette)
+
+
+    def createNewProjectDialog(self, event):
+
+        self.new_project_info = {}
+        
+        
+
+    def setProjectName(self):
+        self.new_project_info['project_name'] = self.newProjectDialog.textProjectName.toPlainText()
+
 
     def setFolderPath(self):
+
         readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder", "./")
         self.newProjectDialog.folderPath.setMarkdown(readFolderPath)
+        self.new_project_info['folder_path'] = readFolderPath
+
 
     def openCategoryInfoDialog(self, event):
 
         self.newProjectDialog.close()
 
         self.setCategoryDialog = setCategoryDialog()
-        self.setCategoryDialog.exec_()
+        self.setCategoryDialog.createButton.clicked.connect(self.createProjectHeader)
+        self.setCategoryDialog.exec()
+
+    def createProjectHeader(self):
+
+        path = self.new_project_info['folder_path']
+        n_row = self.setCategoryDialog.tableWidget.rowCount()
+
+        self.new_project_info['categories'] = []
+
+        for i in range(n_row):
+            self.new_project_info['categories'].append(
+                [
+                    self.setCategoryDialog.tableWidget.item(i, 0).text(),
+                    self.setCategoryDialog.tableWidget.item(i, 2).text()
+                ]
+                )
+            
+        with open(os.path.join(path, 'project_info.hdr'), 'w') as fp:
+            json.dump(self.new_project_info, fp)
+
 
     def mousePressEvent(self, event):
 

@@ -60,7 +60,7 @@ class MainWindow(QMainWindow, form_class_main,
         self.set_roi = False
         self.set_roi_256 = False
         self.circle = True
-        self.ctrl_pressed = False
+        
 
         config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
         checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
@@ -106,7 +106,7 @@ class MainWindow(QMainWindow, form_class_main,
         self.zoomOutButton.clicked.connect(self.on_zoom_out)
 
         # 3. brush tools
-        self.brushButton.clicked.connect(self.openBrushDialog)
+        self.brushButton.mousePressEvent = self.openBrushDialog
 
         # 4. main Image Viewer
         self.mainImageViewer.mousePressEvent = self.mousePressEvent
@@ -137,38 +137,6 @@ class MainWindow(QMainWindow, form_class_main,
 
 
     #### Methods ##### 
-    def keyPressEvent(self, event):
-
-        if event.key() == 16777223: # delete key
-            print(event.key())
-            
-            print(self.labelPath)
-            print(self.imgPath)
-            os.remove(self.imgPath)
-            os.remove(self.labelPath)
-
-        elif event.key() == 16777249 : # ctrl key
-            self.ctrl_pressed = True
-
-        elif event.key() == 83 : # ctrl key
-            if self.ctrl_pressed : 
-                cv2.imwrite(self.labelPath, self.label) 
-                print('Save')
-
-        else :
-            print(event.key())
-
-
-    def keyReleaseEvent(self, event):
-
-        if event.key() == 16777249 : # ctrl key
-            self.ctrl_pressed = False
-
-            
-        
-        
-
-
 
     ######################## 
     ### Image Processing ###
@@ -236,10 +204,8 @@ class MainWindow(QMainWindow, form_class_main,
         self.brushMenu = BrushMenu()
 
         self.initBrushTools()
-        
-
-        # 이게 왜 안되지?? 
-        # self.brushMenu.move(event.globalX(), event.globalY())
+         
+        self.brushMenu.move(event.globalX(), event.globalY())
 
         self.brushMenu.show()
 
@@ -254,14 +220,9 @@ class MainWindow(QMainWindow, form_class_main,
     def setBrushSquare(self):
         self.circle = False
 
-    def openNewProjectDialog(self, event):
+    
 
-        self.newProjectDialog = newProjectDialog()
-        self.newProjectDialog.textProjectName.textChanged.connect(self.setProjectName)
-        self.newProjectDialog.nextButton.clicked.connect(self.openCategoryInfoDialog)
-        self.newProjectDialog.folderButton.clicked.connect(self.setFolderPath)
-
-        self.newProjectDialog.exec()
+        
 
     def openExistingProject(self):
 
@@ -300,6 +261,13 @@ class MainWindow(QMainWindow, form_class_main,
     def createNewProjectDialog(self, event):
 
         self.new_project_info = {}
+
+        self.newProjectDialog = newProjectDialog()
+        self.newProjectDialog.textProjectName.textChanged.connect(self.setProjectName)
+        self.newProjectDialog.nextButton.clicked.connect(self.openCategoryInfoDialog)
+        self.newProjectDialog.folderButton.clicked.connect(self.setFolderPath)
+
+        self.newProjectDialog.exec()
         
         
 
@@ -422,6 +390,23 @@ class MainWindow(QMainWindow, form_class_main,
             self.hKey = True
             QApplication.setOverrideCursor(self.custom_cursor)
             print(self.hKey)
+
+        elif event.key() == 16777223 : # delete key
+            print(event.key())
+            
+            print(self.labelPath)
+            print(self.imgPath)
+            os.remove(self.imgPath)
+            os.remove(self.labelPath)
+
+
+        elif event.key() == 83 : # ctrl key
+            if self.ControlKey : 
+                cv2.imwrite(self.labelPath, self.label) 
+                print('Save')
+
+        else :
+            print(event.key())
           
          
 

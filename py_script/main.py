@@ -143,6 +143,8 @@ class MainWindow(QMainWindow, form_class_main,
     ########################
 
 
+        # addNewImage 버튼 클릭 후 아무 파일 도 선택 안할 시 에러 
+
     def addNewImages(self):
         readFilePath = self.dialog.getOpenFileNames(
             caption="Add images to current working directory", filter="Images (*.png *.jpg)"
@@ -223,6 +225,8 @@ class MainWindow(QMainWindow, form_class_main,
     
 
         
+        # openProject 버튼 클릭 후 아무 파일 도 선택 안할시 에러 
+
 
     def openExistingProject(self):
 
@@ -259,10 +263,11 @@ class MainWindow(QMainWindow, form_class_main,
 
 
     def createNewProjectDialog(self, event):
-
+            # new_project_info 를 딕셔너리 자료형으로 설정 한다.
         self.new_project_info = {}
 
         self.newProjectDialog = newProjectDialog()
+            # textProjectName : QTextEdit
         self.newProjectDialog.textProjectName.textChanged.connect(self.setProjectName)
         self.newProjectDialog.nextButton.clicked.connect(self.openCategoryInfoDialog)
         self.newProjectDialog.folderButton.clicked.connect(self.setFolderPath)
@@ -272,14 +277,20 @@ class MainWindow(QMainWindow, form_class_main,
         
 
     def setProjectName(self):
+            # 딕셔너리 자료형으로 설정한 변수 에서 key 를 설정해주고 해당 key 에 value 값을 할당 한다.
+            # self.new_project_info = {'project_name': self.newProjectDialog.textProjectName.toPlainText() }
         self.new_project_info['project_name'] = self.newProjectDialog.textProjectName.toPlainText()
+        print(self.new_project_info['project_name'])
 
 
     def setFolderPath(self):
 
         readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder", "./")
+        print(readFolderPath)
+            # folderPath : QTextEdit
         self.newProjectDialog.folderPath.setMarkdown(readFolderPath)
         self.new_project_info['folder_path'] = readFolderPath
+        print(self.new_project_info)
 
 
     def openCategoryInfoDialog(self, event):
@@ -291,6 +302,9 @@ class MainWindow(QMainWindow, form_class_main,
         self.setCategoryDialog.exec()
 
     def createProjectHeader(self):
+
+        createProjectFile_name = self.new_project_info['project_name'] + ".hdr"
+        print(createProjectFile_name)
 
         path = self.new_project_info['folder_path']
         n_row = self.setCategoryDialog.tableWidget.rowCount()
@@ -305,8 +319,9 @@ class MainWindow(QMainWindow, form_class_main,
                 ]
                 )
             
-        with open(os.path.join(path, 'project_info.hdr'), 'w') as fp:
+        with open(os.path.join(path, createProjectFile_name), 'w') as fp:
             json.dump(self.new_project_info, fp)
+            self.setCategoryDialog.close()
 
 
     def mousePressEvent(self, event):
@@ -340,41 +355,11 @@ class MainWindow(QMainWindow, form_class_main,
     def showRoiMenu(self):
         self.roiAutoLabelButton.showMenu()
 
-
-    
-
-
-
-
-
-
-
-
-    
-    
-
-    
-
-
-   
-
-    
-
-
-       
-    
-
-        
-    
-        
-
     def setVerticalScale(self, new_scale):
         self.ver_scale = new_scale
 
     def setHorizontalScale(self, new_scale):
         self.hzn_scale = new_scale
-
-    
 
 
     def keyPressEvent(self, event):
@@ -391,16 +376,17 @@ class MainWindow(QMainWindow, form_class_main,
             QApplication.setOverrideCursor(self.custom_cursor)
             print(self.hKey)
 
+            # Delete Image
         elif event.key() == 16777223 : # delete key
             print(event.key())
             
             print(self.labelPath)
             print(self.imgPath)
-            os.remove(self.imgPath)
+            os.remove(self.imgPath)    
             os.remove(self.labelPath)
 
-
-        elif event.key() == 83 : # ctrl key
+            # Save Image
+        elif event.key() == 83 : # S key
             if self.ControlKey : 
                 cv2.imwrite(self.labelPath, self.label) 
                 print('Save')
@@ -408,54 +394,37 @@ class MainWindow(QMainWindow, form_class_main,
         else :
             print(event.key())
           
-         
-
     def keyReleaseEvent(self, event):
 
             # zoom
         if event.key() == Qt.Key_Control:
             self.ControlKey = False
-            #QApplication.setOverrideCursor(Qt.ArrowCursor)
             QApplication.restoreOverrideCursor()
             print(self.ControlKey)
 
             # handMove
         elif event.key() == Qt.Key_H:
             self.hKey = False
-            #QApplication.setOverrideCursor(Qt.ArrowCursor)
             QApplication.restoreOverrideCursor()
             print(self.hKey)
            
-        # 줌 땡겨지는 위치를 조절 하자 
+
     def wheelEvent(self, event):
        
         if self.ControlKey:
-            # mouse angleDelta 가 올리면 1, 내리면 -1 인대 줌인 줌 아웃을 어찌
-            print(f"angleDelta{event.angleDelta().y()/120}")
-            print(type(event.angleDelta().y()))
-            self.mouseWheelAngleDelta = event.angleDelta().y()/120 # ->1
+
+            self.mouseWheelAngleDelta = event.angleDelta().y()/120 # -> 1 (up), -1 (down)
             
             if self.mouseWheelAngleDelta > 0 :
-                print("된다!")
-                print(self.mouseWheelAngleDelta+0.1)
+
                 self.scale *= (self.mouseWheelAngleDelta+0.1)
                 self.resize_image()
 
             elif self.mouseWheelAngleDelta < 0 :
+
                 self.scale /= (abs(self.mouseWheelAngleDelta)+0.1)
                 self.resize_image()
         
-            #self.scale += event.angleDelta().y()/120  
-            #self.resize_image()
-            #print(f"self.scale {self.scale}")
-            #print(event.angleDelta()/1200)
-            #self.scale /= (1.0 + (event.angleDelta() / 1200)) # mouse wheel angleDelta Default = 120
-            #self.resize_image()
-            
-            
-
-            
-
 
     def resize_image(self):
         size = self.pixmap.size()
@@ -475,6 +444,7 @@ class MainWindow(QMainWindow, form_class_main,
         print(f"self.listWidget.currentRow(){self.listWidget.currentRow()}")
         
         self.label_class = self.listWidget.currentRow()
+
 
 
 if __name__ == "__main__" :

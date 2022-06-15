@@ -16,7 +16,7 @@ class setCategoryDialog(QDialog, form_class_brushMenu):
     def __init__(self) :
         super().__init__()
         self.setupUi(self)
-        self.show()
+        # self.show()
 
         self.cancelButton.clicked.connect(self.close)
         self.addRowButton.clicked.connect(self.addRow)

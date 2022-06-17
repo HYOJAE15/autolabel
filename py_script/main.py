@@ -81,16 +81,15 @@ class MainWindow(QMainWindow, form_class_main,
             ])
 
         # treeview setting 
+        self.imgPath = None
         self.folderPath = None
         self.pathRoot = QtCore.QDir.rootPath()
         self.treeModel = QFileSystemModel(self)
-        self.dialog = QFileDialog()
-
-
-        # 1. Menu
+        self.dialog = QFileDialog()   # Find the Folder or File Dialog
         self.treeView.clicked.connect(self.treeViewImage)
         # self.treeView.keyPressEvent.connect(self.pressKey)
-    
+        
+        # 1. Menu
         self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
 
         # 2. zoom in and out
@@ -106,7 +105,7 @@ class MainWindow(QMainWindow, form_class_main,
         self.zoomOutButton.clicked.connect(self.on_zoom_out)
 
         # 3. brush tools
-        self.brushButton.mousePressEvent = self.openBrushDialog
+        self.brushButton.clicked.connect(self.openBrushDialog)
 
         # 4. main Image Viewer
         self.mainImageViewer.mousePressEvent = self.mousePressEvent
@@ -150,36 +149,79 @@ class MainWindow(QMainWindow, form_class_main,
             caption="Add images to current working directory", filter="Images (*.png *.jpg)"
             )
         images = readFilePath[0]
+        print(f'1 {readFilePath}')
+        print(f'2 {images}')
 
-        print(os.path.dirname(images[0]))
-        print(self.treeModel.rootPath())
+        print(f'3 {os.path.dirname(images[0])}')
+        print(f'4 {self.treeModel.rootPath()}')
 
+            # check if images are from same folder
         if self.treeModel.rootPath() in os.path.dirname(images[0]):
+            print("same foler")
             return None
 
-        # check if images are from same folder 
-        img_save_folder = os.path.dirname(self.imgPath)
-        img_label_folder = os.path.dirname(self.labelPath)
-        
-        for img in images:
+         
+            #
+        if self.imgPath :
+
+            dotSplit_imgPath = self.imgPath.split(".")
+            print(f"5 {dotSplit_imgPath}")
+
+                # clicked img_file
+            if 'png' in dotSplit_imgPath :
+
+                img_save_folder = os.path.dirname(self.imgPath)
+                print(img_save_folder)
+                img_label_folder = os.path.dirname(self.labelPath)
+                print(img_label_folder)
+
+                # clicked img_folder
+            elif 'png' not in dotSplit_imgPath :
+ 
+                img_save_folder = self.imgPath
+                img_save_folder = img_save_folder.replace( '_leftImg8bit.png', '')  
+                print(img_save_folder)
             
-            # temp_img = cv2.imread(img, cv2.IMREAD_UNCHANGED) 
-            temp_img = cv2.imdecode(np.fromfile(img, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+                img_label_folder = img_save_folder.replace('/leftImg8bit/', '/gtFine/')
+                img_label_folder = img_label_folder.replace( '_leftImg8bit.png', '')
+            
+                # img_label_folder = self.labelPath
+                print(img_label_folder)
 
-            img_filename = os.path.basename(img)
-            img_filename = img_filename.replace(' ', '')
-            img_filename = img_filename.replace('.jpg', '.png')
-            img_filename = img_filename.replace('.png', '_leftImg8bit.png')
+                #return img_save_folder, img_label_folder 
+                # if loop is end when get return value 
 
-            img_gt_filename = img_filename.replace( '_leftImg8bit.png', '_gtFine_labelIds.png')
-            gt = np.zeros((temp_img.shape[0], temp_img.shape[1]), dtype=np.uint8)
 
-            cv2.imwrite(os.path.join(img_save_folder, img_filename), temp_img)
-            cv2.imwrite(os.path.join(img_label_folder, img_gt_filename), gt)
-            # check file extension -> change extension to png 
-            # create corresponding label file 
+                
 
-            print(os.path.join(img_save_folder, img_filename))
+        
+            for img in images:
+            
+                # temp_img = cv2.imread(img, cv2.IMREAD_UNCHANGED) 
+                temp_img = cv2.imdecode(np.fromfile(img, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+
+                # print(f"temp_img {temp_img}")
+                # print(temp_img.shape)
+
+                img_filename = os.path.basename(img) # -> basename is file name
+                print(f"6 {img_filename}") # -> image name 
+                img_filename = img_filename.replace(' ', '')
+                img_filename = img_filename.replace('.jpg', '.png')
+                img_filename = img_filename.replace('.png', '_leftImg8bit.png')
+
+                img_gt_filename = img_filename.replace( '_leftImg8bit.png', '_gtFine_labelIds.png')
+                gt = np.zeros((temp_img.shape[0], temp_img.shape[1]), dtype=np.uint8)
+
+                cv2.imwrite(os.path.join(img_save_folder, img_filename), temp_img)
+                cv2.imwrite(os.path.join(img_label_folder, img_gt_filename), gt)
+                # check file extension -> change extension to png 
+                # create corresponding label file 
+
+                print(f'7 {os.path.join(img_save_folder, img_filename)}')
+
+        else :
+            print("self.imgPath is None")
+
         
 
     def updateLabelandColormap(self, x, y):
@@ -207,7 +249,8 @@ class MainWindow(QMainWindow, form_class_main,
 
         self.initBrushTools()
          
-        self.brushMenu.move(event.globalX(), event.globalY())
+        # 좌표를 받고 싶다면 mousePressEvent 활용
+        #self.brushMenu.move(event.globalX(), event.globalY())
 
         self.brushMenu.show()
 
@@ -234,9 +277,9 @@ class MainWindow(QMainWindow, form_class_main,
             caption="Select Folder", filter="*.hdr"
             )
         hdr_path = readFilePath[0]
-
+        
         folderPath = os.path.dirname(hdr_path)
-
+        print(folderPath)
         self.treeModel.setRootPath(os.path.join(folderPath, 'leftImg8bit'))
         self.indexRoot = self.treeModel.index(self.treeModel.rootPath())
         self.treeView.setModel(self.treeModel)

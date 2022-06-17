@@ -94,8 +94,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>625</width>
-               <height>480</height>
+               <width>629</width>
+               <height>495</height>
               </rect>
              </property>
              <property name="layoutDirection">
@@ -485,7 +485,7 @@
      <x>0</x>
      <y>0</y>
      <width>1143</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menufile">

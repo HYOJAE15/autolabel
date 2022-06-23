@@ -48,6 +48,8 @@ class MainWindow(QMainWindow, form_class_main,
         self.setupUi(self)
 
         #### Attributes #### 
+        
+        # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
         self.brushSize = 2
         self.ver_scale = 1
@@ -64,7 +66,6 @@ class MainWindow(QMainWindow, form_class_main,
 
         config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
         checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
-
         self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
         
@@ -81,6 +82,7 @@ class MainWindow(QMainWindow, form_class_main,
             ])
 
         # treeview setting 
+        self.openFolderPath = None
         self.imgPath = None
         self.folderPath = None
         self.pathRoot = QtCore.QDir.rootPath()
@@ -145,82 +147,86 @@ class MainWindow(QMainWindow, form_class_main,
         # addNewImage 버튼 클릭 후 아무 파일 도 선택 안할 시 에러 
 
     def addNewImages(self):
-        readFilePath = self.dialog.getOpenFileNames(
-            caption="Add images to current working directory", filter="Images (*.png *.jpg)"
-            )
-        images = readFilePath[0]
-        print(f'1 {readFilePath}')
-        print(f'2 {images}')
-
-        print(f'3 {os.path.dirname(images[0])}')
-        print(f'4 {self.treeModel.rootPath()}')
-
-            # check if images are from same folder
-        if self.treeModel.rootPath() in os.path.dirname(images[0]):
-            print("same foler")
-            return None
-
-         
-            #
-        if self.imgPath :
-
-            dotSplit_imgPath = self.imgPath.split(".")
-            print(f"5 {dotSplit_imgPath}")
-
-                # clicked img_file
-            if 'png' in dotSplit_imgPath :
-
-                img_save_folder = os.path.dirname(self.imgPath)
-                print(img_save_folder)
-                img_label_folder = os.path.dirname(self.labelPath)
-                print(img_label_folder)
-
-                # clicked img_folder
-            elif 'png' not in dotSplit_imgPath :
- 
-                img_save_folder = self.imgPath
-                img_save_folder = img_save_folder.replace( '_leftImg8bit.png', '')  
-                print(img_save_folder)
-            
-                img_label_folder = img_save_folder.replace('/leftImg8bit/', '/gtFine/')
-                img_label_folder = img_label_folder.replace( '_leftImg8bit.png', '')
-            
-                # img_label_folder = self.labelPath
-                print(img_label_folder)
-
-                #return img_save_folder, img_label_folder 
-                # if loop is end when get return value 
-
-
-                
-
         
-            for img in images:
-            
-                # temp_img = cv2.imread(img, cv2.IMREAD_UNCHANGED) 
-                temp_img = cv2.imdecode(np.fromfile(img, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+        try :
 
-                # print(f"temp_img {temp_img}")
-                # print(temp_img.shape)
+            # self.imgPath = self.openFolderPath
 
-                img_filename = os.path.basename(img) # -> basename is file name
-                print(f"6 {img_filename}") # -> image name 
-                img_filename = img_filename.replace(' ', '')
-                img_filename = img_filename.replace('.jpg', '.png')
-                img_filename = img_filename.replace('.png', '_leftImg8bit.png')
+            if self.openFolderPath :
+                self.imgPath = self.openFolderPath
+                print(self.openFolderPath)
+                print(self.imgPath)
 
-                img_gt_filename = img_filename.replace( '_leftImg8bit.png', '_gtFine_labelIds.png')
-                gt = np.zeros((temp_img.shape[0], temp_img.shape[1]), dtype=np.uint8)
+            else :
+                print(f'dang {self.imgPath}')
+                # self.imgPath = self.openFolderPath
+                # print(f"cityscapedataset 비준수 {self.openFolderPath}")
 
-                cv2.imwrite(os.path.join(img_save_folder, img_filename), temp_img)
-                cv2.imwrite(os.path.join(img_label_folder, img_gt_filename), gt)
-                # check file extension -> change extension to png 
-                # create corresponding label file 
+            readFilePath = self.dialog.getOpenFileNames(
+                caption="Add images to current working directory", filter="Images (*.png *.jpg)"
+                )
+            images = readFilePath[0]
 
-                print(f'7 {os.path.join(img_save_folder, img_filename)}')
 
-        else :
-            print("self.imgPath is None")
+                # check if images are from same folder
+            if self.treeModel.rootPath() in os.path.dirname(images[0]):
+                print("same foler")
+                return None
+
+            if self.imgPath :
+
+                dotSplit_imgPath = self.imgPath.split(".")
+                slashSplit_imgPath = self.imgPath.split("/")
+              
+                    # clicked img_file
+                if 'png' in dotSplit_imgPath and 'leftImg8bit' in slashSplit_imgPath :
+
+                    img_save_folder = os.path.dirname(self.imgPath)
+                   
+                    img_label_folder = os.path.dirname(self.labelPath)
+
+                    print("png, left")
+                
+                    # clicked img_folder
+                elif 'png' not in dotSplit_imgPath and 'leftImg8bit' in slashSplit_imgPath :
+    
+                    img_save_folder = self.imgPath
+                    img_save_folder = img_save_folder.replace( '_leftImg8bit.png', '')  
+                
+                    img_label_folder = img_save_folder.replace('/leftImg8bit/', '/gtFine/')
+                    img_label_folder = img_label_folder.replace( '_leftImg8bit.png', '')
+                    print('left')
+
+                else :   # 선택된 폴더가 시티스케이프 데이터셋 이 아닌 다른 경우 에러 발생 UnboundLocalError
+                    print('not cityscapeDataset')
+    
+                for img in images:
+                
+                    temp_img = cv2.imdecode(np.fromfile(img, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+
+                    img_filename = os.path.basename(img) # -> basename is file name
+                    img_filename = img_filename.replace(' ', '')
+                    img_filename = img_filename.replace('.jpg', '.png')
+                    img_filename = img_filename.replace('.png', '_leftImg8bit.png')
+
+                    img_gt_filename = img_filename.replace( '_leftImg8bit.png', '_gtFine_labelIds.png')
+                    gt = np.zeros((temp_img.shape[0], temp_img.shape[1]), dtype=np.uint8)
+
+                    cv2.imwrite(os.path.join(img_save_folder, img_filename), temp_img)
+                    cv2.imwrite(os.path.join(img_label_folder, img_gt_filename), gt)
+                    # check file extension -> change extension to png 
+                    # create corresponding label file 
+
+                    print(f'7 {os.path.join(img_save_folder, img_filename)}')
+
+            else :
+                print("self.imgPath is None")
+        
+        except IndexError as e :
+            print(e)
+
+        except UnboundLocalError as e :
+            print(e)
 
         
 
@@ -246,7 +252,9 @@ class MainWindow(QMainWindow, form_class_main,
   
         self.use_brush = True
         self.brushMenu = BrushMenu()
-
+        
+        #self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        #self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.initBrushTools()
          
         # 좌표를 받고 싶다면 mousePressEvent 활용
@@ -273,37 +281,45 @@ class MainWindow(QMainWindow, form_class_main,
 
     def openExistingProject(self):
 
-        readFilePath = self.dialog.getOpenFileName(
-            caption="Select Folder", filter="*.hdr"
-            )
-        hdr_path = readFilePath[0]
-        
-        folderPath = os.path.dirname(hdr_path)
-        print(folderPath)
-        self.treeModel.setRootPath(os.path.join(folderPath, 'leftImg8bit'))
-        self.indexRoot = self.treeModel.index(self.treeModel.rootPath())
-        self.treeView.setModel(self.treeModel)
-        self.treeView.setRootIndex(self.indexRoot)
-        
+        try :
 
-        with open(hdr_path) as f:
-            hdr = json.load(f)
+            readFilePath = self.dialog.getOpenFileName(
+                caption="Select Project File", filter="*.hdr"
+                )
+            hdr_path = readFilePath[0]
+            
+            folderPath = os.path.dirname(hdr_path)
+            print(folderPath)
+            cityscapeDataset_folderPath = os.path.join(folderPath, "leftImg8bit")
+                # openFolderPath 를 None 으로 받고 treeView 에서 선택한 파일 또는 폴더 주소를 받는다.
+            self.openFolderPath = None
+            print(os.path.join(folderPath, "leftImg8bit"))
+            self.treeModel.setRootPath(os.path.join(folderPath, 'leftImg8bit'))
+            self.indexRoot = self.treeModel.index(self.treeModel.rootPath())
+            self.treeView.setModel(self.treeModel)
+            self.treeView.setRootIndex(self.indexRoot)
+            
 
-        self.listWidget.clear()
+            with open(hdr_path) as f:
+                hdr = json.load(f)
 
-        self.label_palette = []
+            self.listWidget.clear()
 
-        for idx, cat in enumerate(hdr['categories']):
-            name, color = cat[0], cat[1]
-            color = json.loads(color)
-            self.listWidget.addItem(name)
-            iconPixmap = QPixmap(20, 20)
-            iconPixmap.fill(QColor(color[0], color[1], color[2]))
-            self.listWidget.item(idx).setIcon(QIcon(iconPixmap))
-            self.label_palette.append(color)
+            self.label_palette = []
 
-        self.label_palette = np.array(self.label_palette)
+            for idx, cat in enumerate(hdr['categories']):
+                name, color = cat[0], cat[1]
+                color = json.loads(color)
+                self.listWidget.addItem(name)
+                iconPixmap = QPixmap(20, 20)
+                iconPixmap.fill(QColor(color[0], color[1], color[2]))
+                self.listWidget.item(idx).setIcon(QIcon(iconPixmap))
+                self.label_palette.append(color)
 
+            self.label_palette = np.array(self.label_palette)
+
+        except FileNotFoundError as e:
+            print(e)
 
     def createNewProjectDialog(self, event):
             # new_project_info 를 딕셔너리 자료형으로 설정 한다.

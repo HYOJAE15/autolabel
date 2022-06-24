@@ -21,7 +21,7 @@ class TreeView() :
     ########################
 
     def actionOpenFolderFunction(self) :
-        readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder", "./")
+        readFolderPath = self.dialog.getExistingDirectory(None, "Select Folder")
         #readFolderPath = self.dialog.getOpenFileName(self,"select", "./", "Image (*.png *.jpg)" )
         self.folderPath = readFolderPath
         print(f"self.folderPath {self.folderPath}")

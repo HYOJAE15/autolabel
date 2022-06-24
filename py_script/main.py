@@ -93,15 +93,13 @@ class MainWindow(QMainWindow, form_class_main,
         
         # 1. Menu
         self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
-
-        # 2. zoom in and out
-        self.ControlKey = False
         self.actionAddNewImages.triggered.connect(self.addNewImages)
         self.actionNewProject.triggered.connect(self.createNewProjectDialog)
         self.actionOpenProject.triggered.connect(self.openExistingProject)
         # self.actionCreate_a_Project.triggered.connect(self.openCreateProjectDialog)
 
         # 2. Zoom in and out
+        self.ControlKey = False
         self.scale = 1
         self.zoomInButton.clicked.connect(self.on_zoom_in)
         self.zoomOutButton.clicked.connect(self.on_zoom_out)
@@ -249,11 +247,19 @@ class MainWindow(QMainWindow, form_class_main,
 
         if hasattr(self, 'brushMenu'):
             self.brushMenu.close()
-  
+
         self.use_brush = True
+        self.brushButton.setChecked(True)
+        self.roiAutoLabelButton.setChecked(False)
         self.brushMenu = BrushMenu()
+        self.brushMenu.lineEdit.setText(f'{self.brushSize} px')
+        if self.brushSize > 2 :
+            print("brushSize > 2") 
+            self.brushMenu.horizontalSlider.setValue(self.brushSize)
+            self.brushMenu.lineEdit.setText(f'{self.brushSize} px')
+
         
-        #self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        self.brushMenu.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         #self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.initBrushTools()
          
@@ -262,6 +268,13 @@ class MainWindow(QMainWindow, form_class_main,
 
         self.brushMenu.show()
 
+        if self.circle :
+            self.brushMenu.circleButton.setChecked(True)
+            self.brushMenu.squareButton.setChecked(False)
+        elif self.circle == False :
+            self.brushMenu.squareButton.setChecked(True)
+            self.brushMenu.circleButton.setChecked(False)
+
     def initBrushTools(self):
         self.brushMenu.horizontalSlider.valueChanged.connect(self.setBrushSize)
         self.brushMenu.circleButton.clicked.connect(self.setBrushCircle)
@@ -269,14 +282,13 @@ class MainWindow(QMainWindow, form_class_main,
 
     def setBrushCircle(self):
         self.circle = True
+        self.brushMenu.circleButton.setChecked(True)
+        self.brushMenu.squareButton.setChecked(False)
 
     def setBrushSquare(self):
         self.circle = False
-
-    
-
-        
-        # openProject 버튼 클릭 후 아무 파일 도 선택 안할시 에러 
+        self.brushMenu.squareButton.setChecked(True)
+        self.brushMenu.circleButton.setChecked(False)
 
 
     def openExistingProject(self):

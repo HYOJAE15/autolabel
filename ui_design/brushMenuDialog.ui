@@ -90,8 +90,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>265</width>
-        <height>85</height>
+        <width>269</width>
+        <height>69</height>
        </rect>
       </property>
       <widget class="QToolButton" name="squareButton">
@@ -110,6 +110,9 @@
         <iconset>
          <normaloff>../Icon/square.png</normaloff>../Icon/square.png</iconset>
        </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
       </widget>
       <widget class="QToolButton" name="circleButton">
        <property name="geometry">
@@ -126,6 +129,9 @@
        <property name="icon">
         <iconset>
          <normaloff>../Icon/circle.png</normaloff>../Icon/circle.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
      </widget>

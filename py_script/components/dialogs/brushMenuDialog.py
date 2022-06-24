@@ -1,6 +1,7 @@
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
+from numpy import number
 from utils.utils import *
 
 brushMenu_ui = '../../ui_design/brushMenuDialog.ui'
@@ -12,23 +13,28 @@ class BrushMenu(QDialog, form_class_brushMenu):
     def __init__(self) :
         super().__init__()
         self.setupUi(self)
-
         self.use_brush = True
-        self.brushSize = 2
+        # self.brushSize = 2
         #self.horizontalSlider.setValue(self.brushSize)
-        self.lineEdit.setText(f'{self.brushSize} px')
+        #self.lineEdit.setText(f'{self.brushSize} px')
         self.horizontalSlider.valueChanged.connect(self.changeSliderValueText)
         #self.brushSize = self.horizontalSlider.value()
         #self.lineEdit.setText(f'{self.brushSize} px') 
+        # print(self.brushSize)
+        
+
 
     def changeSliderValueText(self):
         number = self.horizontalSlider.value()
 
-        if number % 2 == 1: 
+        if number % 2 == 1:
+            
             number += 1
+
         self.brushSize = number
+        print(self.brushSize)
         self.lineEdit.setText(f'{number} px')
-        self.horizontalSlider.setValue(number) 
+        #self.horizontalSlider.setValue(self.brushDialogNumber) 
             
 
     def keyPressEvent(self, event):

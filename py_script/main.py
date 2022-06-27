@@ -231,6 +231,7 @@ class MainWindow(QMainWindow, form_class_main,
     def updateLabelandColormap(self, x, y):
 
         x, y = self.applyBrushSize(x, y)
+        print(f" updateLabelColormap {x, y}")
 
         try : 
             self.label[y, x] = self.label_class 
@@ -251,6 +252,7 @@ class MainWindow(QMainWindow, form_class_main,
         self.use_brush = True
         self.brushButton.setChecked(True)
         self.roiAutoLabelButton.setChecked(False)
+        print(f" openBrushDialog {self.brushSize}")
         self.brushMenu = BrushMenu()
         self.brushMenu.lineEdit.setText(f'{self.brushSize} px')
         if self.brushSize > 2 :
@@ -258,15 +260,12 @@ class MainWindow(QMainWindow, form_class_main,
             self.brushMenu.horizontalSlider.setValue(self.brushSize)
             self.brushMenu.lineEdit.setText(f'{self.brushSize} px')
 
-        
-        self.brushMenu.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        #self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.initBrushTools()
-         
-        # 좌표를 받고 싶다면 mousePressEvent 활용
-        #self.brushMenu.move(event.globalX(), event.globalY())
-
+        self.brushMenu.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.brushMenu.show()
+
+        #좌표를 받고 싶다면 mousePressEvent 활용
+        #self.brushMenu.move(event.globalX(), event.globalY())
 
         if self.circle :
             self.brushMenu.circleButton.setChecked(True)
@@ -275,6 +274,8 @@ class MainWindow(QMainWindow, form_class_main,
             self.brushMenu.squareButton.setChecked(True)
             self.brushMenu.circleButton.setChecked(False)
 
+        
+                        
     def initBrushTools(self):
         self.brushMenu.horizontalSlider.valueChanged.connect(self.setBrushSize)
         self.brushMenu.circleButton.clicked.connect(self.setBrushCircle)

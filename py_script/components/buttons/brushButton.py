@@ -63,6 +63,7 @@ class BrushButton :
     def brushPressOrReleasePoint(self, event):
 
         x, y = getScaledPoint(event, self.scale)
+        print(f" getsclaePoint {x, y} ")
         
         if (self.x != x) or (self.y != y) :
              

@@ -18,10 +18,28 @@ class ZoomButton :
         super().__init__()
        
     def on_zoom_in(self):
-        self.scale *= 2
+        self.scale *= 1.5
         self.resize_image()
+        self.relativeMouseCoordX = QCursor.pos().x
+        self.relativeMouseCoordY = QCursor.pos().y
+        print(self.relativeMouseCoordX, self.relativeMouseCoordY)
+
+        # self.scrollArea.verticalScrollBar().setValue(0)
+        # self.scrollArea.horizontalScrollBar().setValue(0)
+
 
     def on_zoom_out(self):
-        self.scale /= 2
+        self.scale /= 1.5
         self.resize_image()
+
+        self.relativeMouseCoordX = QCursor.pos().x
+        self.relativeMouseCoordY = QCursor.pos().y
+        print(self.relativeMouseCoordX, self.relativeMouseCoordY)
+
+        # print(self.scrollArea.verticalScrollBar().maximum())
+        # print(self.scrollArea.horizontalScrollBar().maximum())
+        # print(self.scrollArea.verticalScrollBar().value())
+        # print(self.scrollArea.horizontalScrollBar().value())
+        # self.scrollArea.verticalScrollBar().setValue(0)
+        # self.scrollArea.horizontalScrollBar().setValue(0)
 

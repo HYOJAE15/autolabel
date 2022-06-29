@@ -28,7 +28,7 @@ from components.widgets.treeView import TreeView
 
 
 sys.path.append("./dnn/mmseg")
-from mmseg.apis import init_segmentor, inference_segmentor
+#from mmseg.apis import init_segmentor, inference_segmentor
 
 
 # Select folder "autolabel"
@@ -43,6 +43,7 @@ form_class_main = uic.loadUiType(form)[0]
 class MainWindow(QMainWindow, form_class_main,
     AutoLabelButton, BrushButton, ZoomButton,
     ActionFile, TreeView) :
+    wheelChanged = pyqtSignal(float)
     def __init__(self) :
         super().__init__()
         self.setupUi(self)
@@ -64,9 +65,9 @@ class MainWindow(QMainWindow, form_class_main,
         self.circle = True
         
 
-        config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
-        checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
-        self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
+        # config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
+        # checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
+        # self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
         
  
@@ -112,6 +113,8 @@ class MainWindow(QMainWindow, form_class_main,
         self.mainImageViewer.mouseMoveEvent = self.mouseMoveEvent
         self.mainImageViewer.mouseReleaseEvent = self.mouseReleaseEvent
 
+        self.scrollArea.wheelEvent = self.wheelEventScroll
+
         # 5. listWidget
         self.listWidget.itemClicked.connect(self.getListWidgetIndex)
 
@@ -131,9 +134,12 @@ class MainWindow(QMainWindow, form_class_main,
         self.icon = QPixmap("./Icon/square.png")
         self.scaled_icon = self.icon.scaled(QSize(5, 5), Qt.KeepAspectRatio)
         self.custom_cursor = QCursor(self.scaled_icon)
+        # self.wheelChanged.connect(self.adjustScroll)
+        self._mouseWheelAngleDelta = 0
 
 
-
+    def _print(self):
+        print('haha')
 
     #### Methods ##### 
 
@@ -143,6 +149,54 @@ class MainWindow(QMainWindow, form_class_main,
 
 
         # addNewImage 버튼 클릭 후 아무 파일 도 선택 안할 시 에러 
+
+    @property
+    def mouseWheelAngleDelta(self):
+        return self._mouseWheelAngleDelta
+
+    @mouseWheelAngleDelta.setter
+    def mouseWheelAngleDelta(self, value):
+        self._mouseWheelAngleDelta = value
+        
+
+    def adjustScroll(self):
+        if self.ControlKey:
+            _width_diff = self.mainImageViewer.geometry().width() - self.scrollArea.geometry().width()
+            _height_diff = self.mainImageViewer.geometry().height() - self.scrollArea.geometry().height() 
+
+            set_hor_max = _width_diff + 30 if _width_diff > 0 else 0
+            set_ver_max = _height_diff + 30 if _height_diff > 0 else 0
+
+            self.scrollArea.horizontalScrollBar().setRange(0, set_hor_max) 
+            self.scrollArea.verticalScrollBar().setRange(0, set_ver_max) 
+
+            ver_max = self.scrollArea.verticalScrollBar().maximum()
+            hor_max = self.scrollArea.horizontalScrollBar().maximum()
+            y_max_label = self.label.shape[1]
+            x_max_label = self.label.shape[0]
+
+            
+            print(f"set_ver_max {set_ver_max}, set_hor_max {set_hor_max}")
+            print(f"ver_max {ver_max}, hor_max {hor_max}")
+            print(f"x {self.x_store}, y {self.y_store}")
+            print(f"y_max_label {y_max_label}, x_max_label {x_max_label}")
+            
+
+            
+
+            if self.scrollArea.verticalScrollBar().maximum() > 0: 
+
+                setvalueY = self.y_store/y_max_label*ver_max
+                print(f"setvalueY {setvalueY}")
+                
+                self.scrollArea.verticalScrollBar().setValue(setvalueY)
+
+            if self.scrollArea.horizontalScrollBar().maximum() > 0: 
+                setvalueX = self.x_store/x_max_label*hor_max
+                print(f"setvalueX {setvalueX}")
+                
+                self.scrollArea.horizontalScrollBar().setValue(setvalueX)
+            pass
 
     def addNewImages(self):
         
@@ -210,8 +264,12 @@ class MainWindow(QMainWindow, form_class_main,
                     img_gt_filename = img_filename.replace( '_leftImg8bit.png', '_gtFine_labelIds.png')
                     gt = np.zeros((temp_img.shape[0], temp_img.shape[1]), dtype=np.uint8)
 
-                    cv2.imwrite(os.path.join(img_save_folder, img_filename), temp_img)
-                    cv2.imwrite(os.path.join(img_label_folder, img_gt_filename), gt)
+                    is_success, org_img = cv2.imencode(".png", temp_img)
+                    org_img.tofile(os.path.join(img_save_folder, img_filename))
+
+                    is_success, gt_img = cv2.imencode(".png", gt)
+                    gt_img.tofile(os.path.join(img_label_folder, img_gt_filename))
+
                     # check file extension -> change extension to png 
                     # create corresponding label file 
 
@@ -441,6 +499,7 @@ class MainWindow(QMainWindow, form_class_main,
             self.ControlKey = True
             QApplication.setOverrideCursor(self.custom_cursor)
             print(self.ControlKey)
+            
 
             # handMove
         elif event.key() == Qt.Key_H:
@@ -460,7 +519,10 @@ class MainWindow(QMainWindow, form_class_main,
             # Save Image
         elif event.key() == 83 : # S key
             if self.ControlKey : 
-                cv2.imwrite(self.labelPath, self.label) 
+                
+                is_success, label_to_file = cv2.imencode(".png", self.label)
+                label_to_file.tofile(self.labelPath)
+
                 print('Save')
 
         else :
@@ -472,7 +534,6 @@ class MainWindow(QMainWindow, form_class_main,
         if event.key() == Qt.Key_Control:
             self.ControlKey = False
             QApplication.restoreOverrideCursor()
-            print(self.ControlKey)
 
             # handMove
         elif event.key() == Qt.Key_H:
@@ -481,21 +542,75 @@ class MainWindow(QMainWindow, form_class_main,
             print(self.hKey)
            
 
-    def wheelEvent(self, event):
-       
+    def wheelEventScroll(self, event):
+        
+        self.mouseWheelAngleDelta = event.angleDelta().y() # -> 1 (up), -1 (down)
         if self.ControlKey:
 
-            self.mouseWheelAngleDelta = event.angleDelta().y()/120 # -> 1 (up), -1 (down)
+            _x = event.pos().x() - self.mainImageViewer.geometry().x()
+            _y = event.pos().y() - self.mainImageViewer.geometry().y()
+                
+            if self.mouseWheelAngleDelta > 0: 
+                self.scale *= 1.1
+            else : 
+                self.scale /= 1.1
+
+            self.resize_image()
+
+        
+            if self.mouseWheelAngleDelta > 0: 
+                scaled_event_pos = QPoint(_x / self.scale * 1.1, _y / self.scale * 1.1)
+            else : 
+                scaled_event_pos = QPoint(_x / self.scale / 1.1, _y / self.scale / 1.1)
+
             
-            if self.mouseWheelAngleDelta > 0 :
+            self.x_store, self.y_store = scaled_event_pos.x(), scaled_event_pos.y()
 
-                self.scale *= (self.mouseWheelAngleDelta+0.1)
-                self.resize_image()
 
-            elif self.mouseWheelAngleDelta < 0 :
+            _width_diff = self.mainImageViewer.geometry().width() - self.scrollArea.geometry().width()
+            _height_diff = self.mainImageViewer.geometry().height() - self.scrollArea.geometry().height() 
 
-                self.scale /= (abs(self.mouseWheelAngleDelta)+0.1)
-                self.resize_image()
+            set_hor_max = (_width_diff + 20)*1.5 if _width_diff > 0 else 0
+            set_ver_max = (_height_diff + 20)*1.5 if _height_diff > 0 else 0
+
+            self.scrollArea.horizontalScrollBar().setRange(0, set_hor_max) 
+            self.scrollArea.verticalScrollBar().setRange(0, set_ver_max) 
+
+            ver_max = self.scrollArea.verticalScrollBar().maximum()
+            hor_max = self.scrollArea.horizontalScrollBar().maximum()
+            y_max_label = self.label.shape[1]
+            x_max_label = self.label.shape[0]
+
+            
+            print(f"set_ver_max {set_ver_max}, set_hor_max {set_hor_max}")
+            print(f"ver_max {ver_max}, hor_max {hor_max}")
+            
+            print(f"_x {_x}, _y {_y}")
+            print(f"x {self.x_store}, y {self.y_store}")
+            print(f"y_max_label {y_max_label}, x_max_label {x_max_label}")
+
+            if self.scrollArea.verticalScrollBar().maximum() > 0: 
+
+                if self.mouseWheelAngleDelta > 0: 
+                    setvalueY = self.y_store/y_max_label*ver_max*1.5
+                else : 
+                    setvalueY = self.y_store/y_max_label*ver_max
+                print(f"setvalueY {setvalueY}")
+                
+                self.scrollArea.verticalScrollBar().setValue(setvalueY)
+
+            if self.scrollArea.horizontalScrollBar().maximum() > 0: 
+                if self.mouseWheelAngleDelta > 0: 
+                    setvalueX = self.x_store/x_max_label*hor_max*1.5
+                else :
+                    setvalueX = self.x_store/x_max_label*hor_max
+                print(f"setvalueX {setvalueX}")
+                
+                self.scrollArea.horizontalScrollBar().setValue(setvalueX)
+
+        else : 
+            scroll_value = self.scrollArea.verticalScrollBar().value()
+            self.scrollArea.verticalScrollBar().setValue(scroll_value - self.mouseWheelAngleDelta)
         
 
     def resize_image(self):

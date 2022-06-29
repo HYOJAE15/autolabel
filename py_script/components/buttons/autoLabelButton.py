@@ -12,7 +12,7 @@ from PyQt5.QtCore import *
 from utils.utils import *
 
 sys.path.append("./dnn/mmseg")
-from mmseg.apis import init_segmentor, inference_segmentor
+#from mmseg.apis import init_segmentor, inference_segmentor
 
 
 
@@ -20,10 +20,10 @@ class AutoLabelButton :
     def __init__(self) :
         super().__init__()
 
-        config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
-        checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
+        # config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
+        # checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
 
-        self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
+        # self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
 
     def roi256(self):

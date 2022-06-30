@@ -43,7 +43,6 @@ form_class_main = uic.loadUiType(form)[0]
 class MainWindow(QMainWindow, form_class_main,
     AutoLabelButton, BrushButton, ZoomButton,
     ActionFile, TreeView) :
-    wheelChanged = pyqtSignal(float)
     def __init__(self) :
         super().__init__()
         self.setupUi(self)
@@ -112,8 +111,10 @@ class MainWindow(QMainWindow, form_class_main,
         self.mainImageViewer.mousePressEvent = self.mousePressEvent
         self.mainImageViewer.mouseMoveEvent = self.mouseMoveEvent
         self.mainImageViewer.mouseReleaseEvent = self.mouseReleaseEvent
+        self.mainImageViewer.wheelEvent = self.storeXY
 
         self.scrollArea.wheelEvent = self.wheelEventScroll
+
 
         # 5. listWidget
         self.listWidget.itemClicked.connect(self.getListWidgetIndex)
@@ -134,12 +135,13 @@ class MainWindow(QMainWindow, form_class_main,
         self.icon = QPixmap("./Icon/square.png")
         self.scaled_icon = self.icon.scaled(QSize(5, 5), Qt.KeepAspectRatio)
         self.custom_cursor = QCursor(self.scaled_icon)
-        # self.wheelChanged.connect(self.adjustScroll)
-        self._mouseWheelAngleDelta = 0
 
 
-    def _print(self):
-        print('haha')
+    def storeXY(self, event):
+        if self.ControlKey:
+            self.img_v_x = event.pos().x()
+            self.img_v_y = event.pos().y()
+            
 
     #### Methods ##### 
 
@@ -148,56 +150,7 @@ class MainWindow(QMainWindow, form_class_main,
     ########################
 
 
-        # addNewImage 버튼 클릭 후 아무 파일 도 선택 안할 시 에러 
-
-    @property
-    def mouseWheelAngleDelta(self):
-        return self._mouseWheelAngleDelta
-
-    @mouseWheelAngleDelta.setter
-    def mouseWheelAngleDelta(self, value):
-        self._mouseWheelAngleDelta = value
-        
-
-    def adjustScroll(self):
-        if self.ControlKey:
-            _width_diff = self.mainImageViewer.geometry().width() - self.scrollArea.geometry().width()
-            _height_diff = self.mainImageViewer.geometry().height() - self.scrollArea.geometry().height() 
-
-            set_hor_max = _width_diff + 30 if _width_diff > 0 else 0
-            set_ver_max = _height_diff + 30 if _height_diff > 0 else 0
-
-            self.scrollArea.horizontalScrollBar().setRange(0, set_hor_max) 
-            self.scrollArea.verticalScrollBar().setRange(0, set_ver_max) 
-
-            ver_max = self.scrollArea.verticalScrollBar().maximum()
-            hor_max = self.scrollArea.horizontalScrollBar().maximum()
-            y_max_label = self.label.shape[1]
-            x_max_label = self.label.shape[0]
-
-            
-            print(f"set_ver_max {set_ver_max}, set_hor_max {set_hor_max}")
-            print(f"ver_max {ver_max}, hor_max {hor_max}")
-            print(f"x {self.x_store}, y {self.y_store}")
-            print(f"y_max_label {y_max_label}, x_max_label {x_max_label}")
-            
-
-            
-
-            if self.scrollArea.verticalScrollBar().maximum() > 0: 
-
-                setvalueY = self.y_store/y_max_label*ver_max
-                print(f"setvalueY {setvalueY}")
-                
-                self.scrollArea.verticalScrollBar().setValue(setvalueY)
-
-            if self.scrollArea.horizontalScrollBar().maximum() > 0: 
-                setvalueX = self.x_store/x_max_label*hor_max
-                print(f"setvalueX {setvalueX}")
-                
-                self.scrollArea.horizontalScrollBar().setValue(setvalueX)
-            pass
-
+    # addNewImage 버튼 클릭 후 아무 파일 도 선택 안할 시 에러 
     def addNewImages(self):
         
         try :
@@ -289,7 +242,7 @@ class MainWindow(QMainWindow, form_class_main,
     def updateLabelandColormap(self, x, y):
 
         x, y = self.applyBrushSize(x, y)
-        print(f" updateLabelColormap {x, y}")
+        # print(f" updateLabelColormap {x, y}")
 
         try : 
             self.label[y, x] = self.label_class 
@@ -404,7 +357,6 @@ class MainWindow(QMainWindow, form_class_main,
 
         self.newProjectDialog.exec()
         
-        
 
     def setProjectName(self):
             # 딕셔너리 자료형으로 설정한 변수 에서 key 를 설정해주고 해당 key 에 value 값을 할당 한다.
@@ -455,6 +407,10 @@ class MainWindow(QMainWindow, form_class_main,
 
 
     def mousePressEvent(self, event):
+        print("mousePressEvent")
+
+        if self.hKey : 
+            self.scrollAreaMousePress(event)
 
         if self.use_brush : 
             self.brushPressOrReleasePoint(event)
@@ -467,14 +423,19 @@ class MainWindow(QMainWindow, form_class_main,
 
 
     def mouseMoveEvent(self, event):
+        print("mouseMoveEvent")
 
-        if self.use_brush : 
+        if self.hKey : 
+            self.scrollAreaMouseMove(event)
+
+        elif self.use_brush : 
             self.brushMovingPoint(event)
 
         elif self.set_roi : 
             self.roiMovingPoint(event)
 
     def mouseReleaseEvent(self, event): 
+        print("mouseReleaseEvent")
 
         if self.use_brush : 
             self.brushPressOrReleasePoint(event)
@@ -497,14 +458,11 @@ class MainWindow(QMainWindow, form_class_main,
             # zoom
         if event.key() == Qt.Key_Control:
             self.ControlKey = True
-            QApplication.setOverrideCursor(self.custom_cursor)
-            print(self.ControlKey)
-            
 
             # handMove
         elif event.key() == Qt.Key_H:
             self.hKey = True
-            QApplication.setOverrideCursor(self.custom_cursor)
+            # QApplication.setOverrideCursor(self.custom_cursor)
             print(self.hKey)
 
             # Delete Image
@@ -533,85 +491,77 @@ class MainWindow(QMainWindow, form_class_main,
             # zoom
         if event.key() == Qt.Key_Control:
             self.ControlKey = False
-            QApplication.restoreOverrideCursor()
+            # QApplication.restoreOverrideCursor()
 
             # handMove
         elif event.key() == Qt.Key_H:
             self.hKey = False
-            QApplication.restoreOverrideCursor()
+            # QApplication.restoreOverrideCursor()
             print(self.hKey)
-           
 
+    def scrollAreaMousePress(self, event):
+        
+        self.hand_last_point = QPoint(QCursor.pos().x(), QCursor.pos().y())
+        
+    def scrollAreaMouseMove(self, event):
+
+        delta_y = self.hand_last_point.y() - QCursor.pos().y()
+        delta_x = self.hand_last_point.x() -  QCursor.pos().x() 
+
+        print(f"delta_y{delta_y}, delta_x {delta_x}")
+
+        setvalueY = self.scrollArea.verticalScrollBar().value()
+        setvalueX = self.scrollArea.horizontalScrollBar().value()
+        
+        self.scrollArea.verticalScrollBar().setValue(setvalueY + delta_y)
+        self.scrollArea.horizontalScrollBar().setValue(setvalueX + delta_x)
+
+        self.hand_last_point = QPoint(QCursor.pos().x(), QCursor.pos().y())
+
+    
     def wheelEventScroll(self, event):
         
         self.mouseWheelAngleDelta = event.angleDelta().y() # -> 1 (up), -1 (down)
         if self.ControlKey:
-
-            _x = event.pos().x() - self.mainImageViewer.geometry().x()
-            _y = event.pos().y() - self.mainImageViewer.geometry().y()
                 
             if self.mouseWheelAngleDelta > 0: 
                 self.scale *= 1.1
+                width_tobe = self.mainImageViewer.geometry().width() * 1.1
+                height_tobe = self.mainImageViewer.geometry().height() * 1.1
             else : 
                 self.scale /= 1.1
+                width_tobe = self.mainImageViewer.geometry().width() / 1.1
+                height_tobe = self.mainImageViewer.geometry().height() / 1.1
 
             self.resize_image()
 
-        
-            if self.mouseWheelAngleDelta > 0: 
-                scaled_event_pos = QPoint(_x / self.scale * 1.1, _y / self.scale * 1.1)
-            else : 
-                scaled_event_pos = QPoint(_x / self.scale / 1.1, _y / self.scale / 1.1)
+            _width_diff = width_tobe - self.scrollArea.geometry().width()
+            _height_diff = height_tobe - self.scrollArea.geometry().height() 
 
-            
-            self.x_store, self.y_store = scaled_event_pos.x(), scaled_event_pos.y()
+            x_max_img_v = self.mainImageViewer.geometry().width()
+            y_max_img_v = self.mainImageViewer.geometry().height()
 
-
-            _width_diff = self.mainImageViewer.geometry().width() - self.scrollArea.geometry().width()
-            _height_diff = self.mainImageViewer.geometry().height() - self.scrollArea.geometry().height() 
-
-            set_hor_max = (_width_diff + 20)*1.5 if _width_diff > 0 else 0
-            set_ver_max = (_height_diff + 20)*1.5 if _height_diff > 0 else 0
+            set_hor_max = _width_diff + 45 if _width_diff > 0 else 0
+            set_ver_max = _height_diff + 45 if _height_diff > 0 else 0
 
             self.scrollArea.horizontalScrollBar().setRange(0, set_hor_max) 
             self.scrollArea.verticalScrollBar().setRange(0, set_ver_max) 
-
+            
             ver_max = self.scrollArea.verticalScrollBar().maximum()
             hor_max = self.scrollArea.horizontalScrollBar().maximum()
-            y_max_label = self.label.shape[1]
-            x_max_label = self.label.shape[0]
-
             
-            print(f"set_ver_max {set_ver_max}, set_hor_max {set_hor_max}")
-            print(f"ver_max {ver_max}, hor_max {hor_max}")
-            
-            print(f"_x {_x}, _y {_y}")
-            print(f"x {self.x_store}, y {self.y_store}")
-            print(f"y_max_label {y_max_label}, x_max_label {x_max_label}")
-
             if self.scrollArea.verticalScrollBar().maximum() > 0: 
-
-                if self.mouseWheelAngleDelta > 0: 
-                    setvalueY = self.y_store/y_max_label*ver_max*1.5
-                else : 
-                    setvalueY = self.y_store/y_max_label*ver_max
-                print(f"setvalueY {setvalueY}")
-                
+                setvalueY = self.img_v_y/y_max_img_v*ver_max                
                 self.scrollArea.verticalScrollBar().setValue(setvalueY)
 
             if self.scrollArea.horizontalScrollBar().maximum() > 0: 
-                if self.mouseWheelAngleDelta > 0: 
-                    setvalueX = self.x_store/x_max_label*hor_max*1.5
-                else :
-                    setvalueX = self.x_store/x_max_label*hor_max
-                print(f"setvalueX {setvalueX}")
+                setvalueX = self.img_v_x/x_max_img_v*hor_max
                 
                 self.scrollArea.horizontalScrollBar().setValue(setvalueX)
 
         else : 
             scroll_value = self.scrollArea.verticalScrollBar().value()
             self.scrollArea.verticalScrollBar().setValue(scroll_value - self.mouseWheelAngleDelta)
-        
 
     def resize_image(self):
         size = self.pixmap.size()

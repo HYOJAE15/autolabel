@@ -17,7 +17,7 @@ def getScaledPoint(event, scale):
         x, y (PyQt5 Qpoint)
     """
 
-    scaled_event_pos = QPoint(event.pos().x() / scale, event.pos().y() / scale)
+    scaled_event_pos = QPoint(round(event.pos().x() / scale), round(event.pos().y() / scale))
     x, y = scaled_event_pos.x(), scaled_event_pos.y()
 
     return x, y 
@@ -72,10 +72,11 @@ def points_between(x1, y1, x2, y2):
     """
     coordinate between two points
     """
+
     d0 = x2 - x1
     d1 = y2 - y1
     
-    count = max(abs(d1+1), abs(d0+1))
+    count = max(abs(d1)+1, abs(d0)+1)
 
     if d0 == 0:
         return (

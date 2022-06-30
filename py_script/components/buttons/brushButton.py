@@ -65,24 +65,25 @@ class BrushButton :
         x, y = getScaledPoint(event, self.scale)
         print(f" getsclaePoint {x, y} ")
         
-        if (self.x != x) or (self.y != y) :
+        # if (self.x != x) or (self.y != y) :
              
-            self.updateLabelandColormap([x], [y])
-            self.resize_image()  
-            self.x, self.y = x, y
+        self.updateLabelandColormap([x], [y])
+        self.resize_image()  
+        self.x, self.y = x, y
 
 
     def brushMovingPoint(self, event):
 
         x, y = getScaledPoint(event, self.scale)
         
-        if (self.x != x) or (self.y != y) : 
+        # if (self.x != x) or (self.y != y) : 
 
-            x_btw, y_btw = points_between(self.x, self.y, x, y)
+        x_btw, y_btw = points_between(self.x, self.y, x, y)
+        print(f"x_btw, {x_btw} y_btw{y_btw}")
 
-            self.updateLabelandColormap(x_btw, y_btw)
-            self.resize_image()  
-            self.x, self.y = x, y
+        self.updateLabelandColormap(x_btw, y_btw)
+        self.resize_image()  
+        self.x, self.y = x, y
 
          
          

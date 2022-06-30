@@ -242,7 +242,7 @@ class MainWindow(QMainWindow, form_class_main,
     def updateLabelandColormap(self, x, y):
 
         x, y = self.applyBrushSize(x, y)
-        print(f" updateLabelColormap {x, y}")
+        # print(f" updateLabelColormap {x, y}")
 
         try : 
             self.label[y, x] = self.label_class 
@@ -407,6 +407,7 @@ class MainWindow(QMainWindow, form_class_main,
 
 
     def mousePressEvent(self, event):
+        print("mousePressEvent")
 
         if self.hKey : 
             self.scrollAreaMousePress(event)
@@ -422,6 +423,7 @@ class MainWindow(QMainWindow, form_class_main,
 
 
     def mouseMoveEvent(self, event):
+        print("mouseMoveEvent")
 
         if self.hKey : 
             self.scrollAreaMouseMove(event)
@@ -433,6 +435,7 @@ class MainWindow(QMainWindow, form_class_main,
             self.roiMovingPoint(event)
 
     def mouseReleaseEvent(self, event): 
+        print("mouseReleaseEvent")
 
         if self.use_brush : 
             self.brushPressOrReleasePoint(event)

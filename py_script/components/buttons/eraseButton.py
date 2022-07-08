@@ -11,23 +11,21 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 from utils.utils import *
-from components.dialogs.brushMenuDialog import BrushMenu
+from components.dialogs.eraseMenuDialog import EraseMenu
 
-class BrushButton :
+class EraseButton :
     def __init__(self) :
         super().__init__()
-        
 
 
-    def setFalseUseBrush(self):
-        self.use_brush = False
-    
-    def setBrushSize(self):
-        self.brushSize = self.brushMenu.brushSize
 
-    def applyBrushSize(self, X, Y): 
+    def setEraseSize(self):
+        self.eraseSize = self.eraseMenu.eraseSize
+        print(f"eraseButton's self.eraseSize {self.eraseSize}")
 
-        width = int(self.brushSize / 2)
+    def applyEraseSize(self, X, Y): 
+
+        width = int(self.eraseSize / 2)
         
         return_x = []
         return_y = []
@@ -50,30 +48,30 @@ class BrushButton :
 
         return return_x, return_y
         
-    def updateBrushState(self):
+    # def updateBrushState(self):
         
-        self.use_brush = True
-        # 효재: 자료형에서 int 형과 bool 형 차이 없이 '0'(int)이면 False(bool)인가??
-        # 병현: 응 맞아 ㅋㅋ 
-        print(f"type_self.use_brush {type(self.use_brush)}")
-        print(f"self.use_brush {self.use_brush}")
-        print(f"self.set_roi {self.set_roi}")
+    #     self.use_brush = True
+    #     # 효재: 자료형에서 int 형과 bool 형 차이 없이 '0'(int)이면 False(bool)인가??
+    #     # 병현: 응 맞아 ㅋㅋ 
+    #     print(f"type_self.use_brush {type(self.use_brush)}")
+    #     print(f"self.use_brush {self.use_brush}")
+    #     print(f"self.set_roi {self.set_roi}")
 
 
-    def brushPressOrReleasePoint(self, event):
+    def erasePressOrReleasePoint(self, event):
 
         x, y = getScaledPoint(event, self.scale)
         print(f" getsclaePoint {x, y} ")
         
         if (self.x != x) or (self.y != y) :
             
-            self.brushMemory = True
+            self.eraseMemory = True
             self.updateLabelandColormap([x], [y])
             self.resize_image()  
             self.x, self.y = x, y
 
 
-    def brushMovingPoint(self, event):
+    def eraseMovingPoint(self, event):
 
         x, y = getScaledPoint(event, self.scale)
         
@@ -85,6 +83,3 @@ class BrushButton :
             self.updateLabelandColormap(x_btw, y_btw)
             self.resize_image()  
             self.x, self.y = x, y
-
-         
-         

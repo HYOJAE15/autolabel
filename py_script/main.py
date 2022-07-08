@@ -12,14 +12,17 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+
 from utils.utils import *
 
 from components.dialogs.brushMenuDialog import BrushMenu
+from components.dialogs.eraseMenuDialog import EraseMenu
 from components.dialogs.newProjectDialog import newProjectDialog
 from components.dialogs.setCategoryDialog import setCategoryDialog
 
 from components.buttons.autoLabelButton import AutoLabelButton
 from components.buttons.brushButton import BrushButton
+from components.buttons.eraseButton import EraseButton
 from components.buttons.zoomButton import ZoomButton
 
 from components.actions.actionFile import ActionFile
@@ -28,7 +31,7 @@ from components.widgets.treeView import TreeView
 
 
 sys.path.append("./dnn/mmseg")
-#from mmseg.apis import init_segmentor, inference_segmentor
+from mmseg.apis import init_segmentor, inference_segmentor
 
 
 # Select folder "autolabel"
@@ -41,8 +44,8 @@ form_class_main = uic.loadUiType(form)[0]
 # Mainwindow class
 
 class MainWindow(QMainWindow, form_class_main,
-    AutoLabelButton, BrushButton, ZoomButton,
-    ActionFile, TreeView) :
+                 AutoLabelButton, BrushButton, EraseButton,
+                                       ActionFile, TreeView) :
     def __init__(self) :
         super().__init__()
         self.setupUi(self)
@@ -52,6 +55,7 @@ class MainWindow(QMainWindow, form_class_main,
         # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
         self.brushSize = 2
+        self.eraseSize = 2
         self.ver_scale = 1
         self.hzn_scale = 1
         self.x = 0 
@@ -59,14 +63,15 @@ class MainWindow(QMainWindow, form_class_main,
         self.label_class = 0
         self.alpha = 0.5
         self.use_brush = False
+        self.use_erase = False
         self.set_roi = False
         self.set_roi_256 = False
         self.circle = True
         
 
-        # config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
-        # checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
-        # self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
+        config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
+        checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
+        self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
         
  
@@ -89,6 +94,7 @@ class MainWindow(QMainWindow, form_class_main,
         self.treeModel = QFileSystemModel(self)
         self.dialog = QFileDialog()   # Find the Folder or File Dialog
         self.treeView.clicked.connect(self.treeViewImage)
+        self.treeView.clicked.connect(self.askSave)
         # self.treeView.keyPressEvent.connect(self.pressKey)
         
         # 1. Menu
@@ -101,11 +107,11 @@ class MainWindow(QMainWindow, form_class_main,
         # 2. Zoom in and out
         self.ControlKey = False
         self.scale = 1
-        self.zoomInButton.clicked.connect(self.on_zoom_in)
-        self.zoomOutButton.clicked.connect(self.on_zoom_out)
+        
 
-        # 3. brush tools
+        # 3. brush & erase tools
         self.brushButton.clicked.connect(self.openBrushDialog)
+        self.eraseButton.clicked.connect(self.openEraseDialog)
 
         # 4. main Image Viewer
         self.mainImageViewer.mousePressEvent = self.mousePressEvent
@@ -240,13 +246,28 @@ class MainWindow(QMainWindow, form_class_main,
         
 
     def updateLabelandColormap(self, x, y):
+        
+        if self.use_brush :
+            x, y = self.applyBrushSize(x, y)
+        elif self.use_erase :
+            x, y = self.applyEraseSize(x, y)
 
-        x, y = self.applyBrushSize(x, y)
+        
         # print(f" updateLabelColormap {x, y}")
 
         try : 
-            self.label[y, x] = self.label_class 
-            self.colormap[y, x] = self.img[y, x] * self.alpha + self.label_palette[self.label_class] * (1-self.alpha)
+            print(f"label_class {self.label_class}")
+            print(type(self.label_class))
+            if self.use_brush :
+                self.label[y, x] = self.label_class
+                self.colormap[y, x] = self.img[y, x] * self.alpha + self.label_palette[self.label_class] * (1-self.alpha)
+
+            elif self.use_erase :
+                self.label[y, x] = 0
+                print("eraseMode")
+                self.colormap[y, x] = self.img[y, x] * self.alpha + self.label_palette[0] * (1-self.alpha)
+
+            
             self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
         except BaseException as e : 
             print(e)
@@ -286,7 +307,26 @@ class MainWindow(QMainWindow, form_class_main,
             self.brushMenu.circleButton.setChecked(False)
 
         
+    def openEraseDialog(self, event):
+        print("erase")
+        self.eraseButton.setChecked(True)
+        self.use_erase = True
+        self.eraseMenu = EraseMenu()
+        self.eraseMenu.eraselineEdit.setText(f'{self.eraseSize} px')
+        if self.eraseSize > 2 :
+            print("eraseSize > 2") 
+            self.eraseMenu.erasehorizontalSlider.setValue(self.eraseSize)
+            self.eraseMenu.eraselineEdit.setText(f'{self.eraseSize} px')
+        
+        self.initEraseTools()
+        self.eraseMenu.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        self.eraseMenu.show()
+
+
                         
+    def initEraseTools(self):
+        self.eraseMenu.erasehorizontalSlider.valueChanged.connect(self.setEraseSize)
+
     def initBrushTools(self):
         self.brushMenu.horizontalSlider.valueChanged.connect(self.setBrushSize)
         self.brushMenu.circleButton.clicked.connect(self.setBrushCircle)
@@ -318,6 +358,7 @@ class MainWindow(QMainWindow, form_class_main,
                 # openFolderPath 를 None 으로 받고 treeView 에서 선택한 파일 또는 폴더 주소를 받는다.
             self.openFolderPath = None
             print(os.path.join(folderPath, "leftImg8bit"))
+            self.fileNameLabel.setText(cityscapeDataset_folderPath)
             self.treeModel.setRootPath(os.path.join(folderPath, 'leftImg8bit'))
             self.indexRoot = self.treeModel.index(self.treeModel.rootPath())
             self.treeView.setModel(self.treeModel)
@@ -415,6 +456,9 @@ class MainWindow(QMainWindow, form_class_main,
         if self.use_brush : 
             self.brushPressOrReleasePoint(event)
 
+        elif self.use_erase :
+            self.erasePressOrReleasePoint(event)
+
         elif self.set_roi : 
             self.roiPressPoint(event)
 
@@ -431,6 +475,9 @@ class MainWindow(QMainWindow, form_class_main,
         elif self.use_brush : 
             self.brushMovingPoint(event)
 
+        elif self.use_erase :
+            self.eraseMovingPoint(event)
+
         elif self.set_roi : 
             self.roiMovingPoint(event)
 
@@ -439,6 +486,9 @@ class MainWindow(QMainWindow, form_class_main,
 
         if self.use_brush : 
             self.brushPressOrReleasePoint(event)
+
+        elif self.use_erase :
+            self.erasePressOrReleasePoint(event)
 
         elif self.set_roi : 
             self.roiReleasePoint(event)
@@ -452,7 +502,9 @@ class MainWindow(QMainWindow, form_class_main,
     def setHorizontalScale(self, new_scale):
         self.hzn_scale = new_scale
 
-
+        # key press 에서 기능 을 키고 끄는것은 어떻게 하나
+        # turn on : 단축키 press 
+        # turn off : 한번더 press 
     def keyPressEvent(self, event):
 
             # zoom
@@ -460,10 +512,47 @@ class MainWindow(QMainWindow, form_class_main,
             self.ControlKey = True
 
             # handMove
-        elif event.key() == Qt.Key_H:
+            # h_key 한번 press 후 마우스 로 이동 
+        elif event.key() == Qt.Key_H: 
             self.hKey = True
             # QApplication.setOverrideCursor(self.custom_cursor)
             print(self.hKey)
+
+            # Brush
+            # B_key 한번 press 후 Brush 기능 키고 끄자 
+        elif event.key() == 66 : # B Key
+            print("B")
+            
+            if self.use_brush == True :
+                self.use_brush = False
+                self.brushMenu.close()
+                self.brushButton.setChecked(False)
+
+            else :
+                self.openBrushDialog(event)
+                self.use_erase = False
+                self.eraseButton.setChecked(False)
+                self.eraseMenu.close()
+                
+
+        
+        elif event.key() == 69 : # E Key
+            print("E")
+
+            if self.use_erase == True :
+                self.use_erase = False
+                self.eraseMenu.close()
+                self.eraseButton.setChecked(False)
+
+            else :
+                self.openEraseDialog(event)
+                self.use_brush = False
+                self.brushButton.setChecked(False)
+                self.brushMenu.close()
+
+
+
+
 
             # Delete Image
         elif event.key() == 16777223 : # delete key
@@ -482,7 +571,10 @@ class MainWindow(QMainWindow, form_class_main,
                 label_to_file.tofile(self.labelPath)
 
                 print('Save')
-
+                self.saveImgName = os.path.basename(self.imgPath)
+                print(self.saveImgName)
+                self.situationLabel.setText(self.saveImgName + "을(를) 저장하였습니다.")
+                
         else :
             print(event.key())
           

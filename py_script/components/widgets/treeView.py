@@ -25,6 +25,7 @@ class TreeView() :
         #readFolderPath = self.dialog.getOpenFileName(self,"select", "./", "Image (*.png *.jpg)" )
         self.folderPath = readFolderPath
         print(f"self.folderPath {self.folderPath}")
+        self.fileNameLabel.setText(self.folderPath)
         slashSplit_imgPath = self.folderPath.split('/')
         print(slashSplit_imgPath)
         cityScapeDataset_folderPath = os.path.basename(self.folderPath)
@@ -51,11 +52,12 @@ class TreeView() :
     def treeViewImage(self, index) :
 
         try : 
-
+            
             indexItem = self.treeModel.index(index.row(), 0, index.parent())
             
             self.imgPath = self.treeModel.filePath(indexItem)
             print(f"self.imgPath {self.imgPath}")
+            self.fileNameLabel.setText(self.imgPath)
             dotSplit_imgPath = self.imgPath.split('.')
             print(dotSplit_imgPath)
             
@@ -76,6 +78,12 @@ class TreeView() :
 
                 self.resize_image()
 
+                self.situationLabel.clear()
+                self.saveImgName = None
+                self.brushMemory = None
+
+                
+
             else :
                 pass
               
@@ -83,3 +91,9 @@ class TreeView() :
         except: 
             print("Error Occured")
     
+
+
+    def askSave(self) :
+        
+        print("askSave")
+        

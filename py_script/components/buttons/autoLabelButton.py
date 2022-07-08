@@ -1,4 +1,5 @@
 
+from cmath import e
 import cv2
 import sys
 
@@ -12,7 +13,7 @@ from PyQt5.QtCore import *
 from utils.utils import *
 
 sys.path.append("./dnn/mmseg")
-#from mmseg.apis import init_segmentor, inference_segmentor
+from mmseg.apis import init_segmentor, inference_segmentor
 
 
 
@@ -55,43 +56,62 @@ class AutoLabelButton :
 
     def roi256PressPoint(self, event):
 
-        x, y = getScaledPoint(event, self.scale)
-        self.rect_start = x-128, y-128
-        self.rect_end = x+128, y+128
+        try : 
 
-        
-        result = inference_segmentor(self.model, self.img[self.rect_start[1]: self.rect_end[1],
-                                        self.rect_start[0]: self.rect_end[0], :])
+            x, y = getScaledPoint(event, self.scale)
+            if x < 128 and y < 128 :
+                print("x < 128 and y < 128")
+                self.rect_start = 0, 0
+                print(self.rect_start)
+                print(type(self.rect_start))
+                self.rect_end = x+128, y+128
+            elif x < 128 :
+                print("x < 128")
+                self.rect_start = 0, y-128
+                self.rect_end = x+128, y+128
+            elif y < 128 :
+                print("y < 128")
+                self.rect_start = x-128, 0
+                self.rect_end = x+128, y+128 
+            else :
+                print("dang")
+                self.rect_start = x-128, y-128
+                self.rect_end = x+128, y+128
 
-        cv2.imshow("cropImage", self.img[self.rect_start[1]: self.rect_end[1],
-                                        self.rect_start[0]: self.rect_end[0], :])
-        
+            
+            result = inference_segmentor(self.model, self.img[self.rect_start[1]: self.rect_end[1],
+                                            self.rect_start[0]: self.rect_end[0], :])
 
-        print(f'cropImage.shape {self.img[self.rect_start[1]: self.rect_end[1], self.rect_start[0]: self.rect_end[0], :].shape}')
-        
+            cv2.imshow("cropImage", self.img[self.rect_start[1]: self.rect_end[1],
+                                            self.rect_start[0]: self.rect_end[0], :])
+            
 
-        idx = np.argwhere(result[0] == 1)
-        y_idx, x_idx = idx[:, 0], idx[:, 1]
-        x_idx = x_idx + self.rect_start[0]
-        y_idx = y_idx + self.rect_start[1]
+            print(f'cropImage.shape {self.img[self.rect_start[1]: self.rect_end[1], self.rect_start[0]: self.rect_end[0], :].shape}')
+            
 
-        self.label[y_idx, x_idx] = 1
-        
-        self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
-        self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
-        self.resize_image()
+            idx = np.argwhere(result[0] == 1)
+            y_idx, x_idx = idx[:, 0], idx[:, 1]
+            x_idx = x_idx + self.rect_start[0]
+            y_idx = y_idx + self.rect_start[1]
+
+            self.label[y_idx, x_idx] = 1
+            
+            self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
+            self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+            self.resize_image()
 
 
-        thickness = 2    
+            thickness = 2    
 
-        rect_256 = cv2.rectangle(
-            self.colormap.copy(), self.rect_start, self.rect_end, (255, 255, 255), thickness)
+            rect_256 = cv2.rectangle(
+                self.colormap.copy(), self.rect_start, self.rect_end, (255, 255, 255), thickness)
 
-        print(f"rectangle size {self.rect_start, self.rect_end}")
-        self.pixmap = QPixmap(cvtArrayToQImage(rect_256))
-        self.resize_image()
-        
-
+            print(f"rectangle size {self.rect_start, self.rect_end}")
+            self.pixmap = QPixmap(cvtArrayToQImage(rect_256))
+            self.resize_image()
+            
+        except ZeroDivisionError as e :
+            print(e)
 
         
     def roiPressPoint(self, event):

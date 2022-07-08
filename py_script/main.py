@@ -528,11 +528,15 @@ class MainWindow(QMainWindow, form_class_main,
                 self.brushMenu.close()
                 self.brushButton.setChecked(False)
 
-            else :
+            elif self.use_erase :
                 self.openBrushDialog(event)
                 self.use_erase = False
                 self.eraseButton.setChecked(False)
                 self.eraseMenu.close()
+
+            else :
+                self.openBrushDialog(event)
+
                 
 
         
@@ -544,11 +548,14 @@ class MainWindow(QMainWindow, form_class_main,
                 self.eraseMenu.close()
                 self.eraseButton.setChecked(False)
 
-            else :
+            elif self.use_brush :
                 self.openEraseDialog(event)
                 self.use_brush = False
                 self.brushButton.setChecked(False)
                 self.brushMenu.close()
+
+            else :
+                self.openEraseDialog(event)
 
 
 

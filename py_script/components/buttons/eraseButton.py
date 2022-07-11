@@ -34,11 +34,11 @@ class EraseButton :
         _Y, _X = _Y.flatten(), _X.flatten()
         _Y, _X = np.squeeze(_Y), np.squeeze(_X)
 
-        if self.circle :
-            dist = [np.sqrt(_x**2 + _y**2) for _x, _y in zip(_Y, _X)]
-            _Y =  [_y for idx, _y in enumerate(_Y) if dist[idx] < width]
-            _X = [_x for idx, _x in enumerate(_X) if dist[idx] < width]
-            _X, _Y = np.array(_X), np.array(_Y)
+        # if self.circle :
+        #     dist = [np.sqrt(_x**2 + _y**2) for _x, _y in zip(_Y, _X)]
+        #     _Y =  [_y for idx, _y in enumerate(_Y) if dist[idx] < width]
+        #     _X = [_x for idx, _x in enumerate(_X) if dist[idx] < width]
+        #     _X, _Y = np.array(_X), np.array(_Y)
 
         for x, y in zip(X, Y):
             _x = x + _X

@@ -448,12 +448,12 @@ class MainWindow(QMainWindow, form_class_main,
 
 
     def mousePressEvent(self, event):
-        print("mousePressEvent")
+        # print("mousePressEvent")
 
         if self.hKey : 
             self.scrollAreaMousePress(event)
 
-        if self.use_brush : 
+        elif self.use_brush : 
             self.brushPressOrReleasePoint(event)
 
         elif self.use_erase :
@@ -467,7 +467,7 @@ class MainWindow(QMainWindow, form_class_main,
 
 
     def mouseMoveEvent(self, event):
-        print("mouseMoveEvent")
+        # print("mouseMoveEvent")
 
         if self.hKey : 
             self.scrollAreaMouseMove(event)
@@ -482,9 +482,12 @@ class MainWindow(QMainWindow, form_class_main,
             self.roiMovingPoint(event)
 
     def mouseReleaseEvent(self, event): 
-        print("mouseReleaseEvent")
+        # print("mouseReleaseEvent")
 
-        if self.use_brush : 
+        if self.hKey :
+            pass
+
+        elif self.use_brush : 
             self.brushPressOrReleasePoint(event)
 
         elif self.use_erase :
@@ -516,7 +519,7 @@ class MainWindow(QMainWindow, form_class_main,
         elif event.key() == Qt.Key_H: 
             self.hKey = True
             # QApplication.setOverrideCursor(self.custom_cursor)
-            print(self.hKey)
+            
 
             # Brush
             # B_key 한번 press 후 Brush 기능 키고 끄자 
@@ -596,18 +599,21 @@ class MainWindow(QMainWindow, form_class_main,
         elif event.key() == Qt.Key_H:
             self.hKey = False
             # QApplication.restoreOverrideCursor()
-            print(self.hKey)
-
+            
+        # brush 기능 중 화면 이동하면 브러시 작동한다
+        # mousePress 및 Release def 로 수정
     def scrollAreaMousePress(self, event):
         
+
         self.hand_last_point = QPoint(QCursor.pos().x(), QCursor.pos().y())
+        print(f"scrollAreaMousePress's pos {self.hand_last_point}")
         
     def scrollAreaMouseMove(self, event):
 
         delta_y = self.hand_last_point.y() - QCursor.pos().y()
         delta_x = self.hand_last_point.x() -  QCursor.pos().x() 
 
-        print(f"delta_y{delta_y}, delta_x {delta_x}")
+        print(f"delta_y {delta_y}, delta_x {delta_x}")
 
         setvalueY = self.scrollArea.verticalScrollBar().value()
         setvalueX = self.scrollArea.horizontalScrollBar().value()

@@ -31,7 +31,7 @@ from components.widgets.treeView import TreeView
 
 
 sys.path.append("./dnn/mmseg")
-from mmseg.apis import init_segmentor, inference_segmentor
+# from mmseg.apis import init_segmentor, inference_segmentor
 
 
 # Select folder "autolabel"
@@ -69,9 +69,9 @@ class MainWindow(QMainWindow, form_class_main,
         self.circle = True
         
 
-        config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
-        checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
-        self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
+        # config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
+        # checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
+        # self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
         
  
@@ -276,6 +276,7 @@ class MainWindow(QMainWindow, form_class_main,
     ### Mouse Event Handler ###
     ###########################
 
+
     def openBrushDialog(self, event):
 
         if hasattr(self, 'brushMenu'):
@@ -297,7 +298,7 @@ class MainWindow(QMainWindow, form_class_main,
         self.brushMenu.show()
 
         #좌표를 받고 싶다면 mousePressEvent 활용
-        #self.brushMenu.move(event.globalX(), event.globalY())
+        self.brushMenu.move(self.pos())
 
         if self.circle :
             self.brushMenu.circleButton.setChecked(True)
@@ -318,6 +319,7 @@ class MainWindow(QMainWindow, form_class_main,
             self.eraseMenu.erasehorizontalSlider.setValue(self.eraseSize)
             self.eraseMenu.eraselineEdit.setText(f'{self.eraseSize} px')
         
+        self.eraseMenu.move(self.pos())
         self.initEraseTools()
         self.eraseMenu.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.eraseMenu.show()

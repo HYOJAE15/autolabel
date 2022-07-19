@@ -31,7 +31,7 @@ from components.widgets.treeView import TreeView
 
 
 sys.path.append("./dnn/mmseg")
-# from mmseg.apis import init_segmentor, inference_segmentor
+from mmseg.apis import init_segmentor, inference_segmentor
 
 
 # Select folder "autolabel"
@@ -69,9 +69,9 @@ class MainWindow(QMainWindow, form_class_main,
         self.circle = True
         
 
-        # config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
-        # checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
-        # self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
+        config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
+        checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
+        self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
         
  

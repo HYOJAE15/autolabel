@@ -1,4 +1,5 @@
 
+from cmath import e
 import cv2
 import sys
 
@@ -11,8 +12,8 @@ from PyQt5.QtCore import *
 
 from utils.utils import *
 
-sys.path.append("./dnn/mmseg")
-#from mmseg.apis import init_segmentor, inference_segmentor
+sys.path.append("./dnn/mmsegmentation")
+from mmseg.apis import inference_segmentor
 
 
 
@@ -20,10 +21,6 @@ class AutoLabelButton :
     def __init__(self) :
         super().__init__()
 
-        # config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
-        # checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
-
-        # self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
 
     def roi256(self):
@@ -32,6 +29,8 @@ class AutoLabelButton :
         self.roiAutoLabelButton.setChecked(True)
 
         self.use_brush = False
+
+        self.use_erase = False
 
         self.set_roi = False
 
@@ -45,6 +44,8 @@ class AutoLabelButton :
 
         self.use_brush = False
 
+        self.use_erase = False
+
         self.set_roi = True
         
         self.set_roi_256 = False
@@ -55,56 +56,75 @@ class AutoLabelButton :
 
     def roi256PressPoint(self, event):
 
-        x, y = getScaledPoint(event, self.scale)
-        self.rect_start = x-128, y-128
-        self.rect_end = x+128, y+128
+        try : 
 
-        
-        result = inference_segmentor(self.model, self.img[self.rect_start[1]: self.rect_end[1],
-                                        self.rect_start[0]: self.rect_end[0], :])
+            x, y = getScaledPoint(event, self.scale)
+            if x < 128 and y < 128 :
+                print("x < 128 and y < 128")
+                self.rect_start = 0, 0
+                print(self.rect_start)
+                print(type(self.rect_start))
+                self.rect_end = x+128, y+128
+            elif x < 128 :
+                print("x < 128")
+                self.rect_start = 0, y-128
+                self.rect_end = x+128, y+128
+            elif y < 128 :
+                print("y < 128")
+                self.rect_start = x-128, 0
+                self.rect_end = x+128, y+128 
+            else :
+                print("dang")
+                self.rect_start = x-128, y-128
+                self.rect_end = x+128, y+128
 
-        cv2.imshow("cropImage", self.img[self.rect_start[1]: self.rect_end[1],
-                                        self.rect_start[0]: self.rect_end[0], :])
-        
+            
+            result = inference_segmentor(self.model, self.img[self.rect_start[1]: self.rect_end[1],
+                                            self.rect_start[0]: self.rect_end[0], :])
 
-        print(f'cropImage.shape {self.img[self.rect_start[1]: self.rect_end[1], self.rect_start[0]: self.rect_end[0], :].shape}')
-        
+            cv2.imshow("cropImage", self.img[self.rect_start[1]: self.rect_end[1],
+                                            self.rect_start[0]: self.rect_end[0], :])
+            
 
-        idx = np.argwhere(result[0] == 1)
-        y_idx, x_idx = idx[:, 0], idx[:, 1]
-        x_idx = x_idx + self.rect_start[0]
-        y_idx = y_idx + self.rect_start[1]
+            print(f'cropImage.shape {self.img[self.rect_start[1]: self.rect_end[1], self.rect_start[0]: self.rect_end[0], :].shape}')
+            
 
-        self.label[y_idx, x_idx] = 1
-        
-        self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
-        self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
-        self.resize_image()
+            idx = np.argwhere(result[0] == 1)
+            y_idx, x_idx = idx[:, 0], idx[:, 1]
+            x_idx = x_idx + self.rect_start[0]
+            y_idx = y_idx + self.rect_start[1]
+
+            self.label[y_idx, x_idx] = 1
+            
+            self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
+            self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+            self.resize_image()
 
 
-        thickness = 2    
+            thickness = 2    
 
-        rect_256 = cv2.rectangle(
-            self.colormap.copy(), self.rect_start, self.rect_end, (255, 255, 255), thickness)
+            rect_256 = cv2.rectangle(
+                self.colormap.copy(), self.rect_start, self.rect_end, (255, 255, 255), thickness)
 
-        print(f"rectangle size {self.rect_start, self.rect_end}")
-        self.pixmap = QPixmap(cvtArrayToQImage(rect_256))
-        self.resize_image()
-        
-
+            print(f"rectangle size {self.rect_start, self.rect_end}")
+            self.pixmap = QPixmap(cvtArrayToQImage(rect_256))
+            self.resize_image()
+            
+        except ZeroDivisionError as e :
+            print(e)
 
         
     def roiPressPoint(self, event):
 
         x, y = getScaledPoint(event, self.scale)
 
-        self.rect_start = x, y
+        self.rect_start = [x, y]
 
     def roiMovingPoint(self, event):
 
         x, y = getScaledPoint(event, self.scale)
 
-        self.rect_end = x, y
+        self.rect_end = [x, y]
 
         thickness = 5
 
@@ -117,8 +137,32 @@ class AutoLabelButton :
     def roiReleasePoint(self, event):
 
         x, y = getScaledPoint(event, self.scale)
+    
+        if x < self.rect_start[0] : 
+            temp = x 
+            x = self.rect_start[0]
+            self.rect_start[0] = temp 
+            
+        if y < self.rect_start[1] : 
+            temp = y 
+            y = self.rect_start[1]
+            self.rect_start[1] = temp 
 
-        self.rect_end = x, y
+        self.rect_end = [x, y] 
+
+        if (self.rect_end[0] == self.rect_start[0]) | (self.rect_end[1] == self.rect_start[1]):
+            self.rect_start[0] -= int(128/self.scale)
+            self.rect_start[1] -= int(128/self.scale)  
+
+            self.rect_end[0] += int(128/self.scale) 
+            self.rect_end[1] += int(128/self.scale) 
+
+        self.rect_start[0] = np.clip(self.rect_start[0], 0, self.label.shape[1])
+        self.rect_start[1] = np.clip(self.rect_start[1], 0, self.label.shape[0])
+
+        self.rect_end[0] = np.clip(self.rect_end[0], 0, self.label.shape[1])
+        self.rect_end[1] = np.clip(self.rect_end[1], 0, self.label.shape[0])
+            
 
         result = inference_segmentor(self.model, self.img[self.rect_start[1]: y, self.rect_start[0]: x, :])
 

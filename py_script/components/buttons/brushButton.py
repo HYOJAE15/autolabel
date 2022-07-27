@@ -17,8 +17,6 @@ class BrushButton :
     def __init__(self) :
         super().__init__()
         
-
-
     def setFalseUseBrush(self):
         self.use_brush = False
     
@@ -53,8 +51,7 @@ class BrushButton :
     def updateBrushState(self):
         
         self.use_brush = True
-        # 효재: 자료형에서 int 형과 bool 형 차이 없이 '0'(int)이면 False(bool)인가??
-        # 병현: 응 맞아 ㅋㅋ 
+        
         print(f"type_self.use_brush {type(self.use_brush)}")
         print(f"self.use_brush {self.use_brush}")
         print(f"self.set_roi {self.set_roi}")
@@ -65,25 +62,26 @@ class BrushButton :
         x, y = getScaledPoint(event, self.scale)
         print(f" getsclaePoint {x, y} ")
         
-        # if (self.x != x) or (self.y != y) :
-             
-        self.updateLabelandColormap([x], [y])
-        self.resize_image()  
-        self.x, self.y = x, y
+        if (self.x != x) or (self.y != y) :
+            
+            self.brushMemory = True
+            self.updateLabelandColormap([x], [y])
+            self.resize_image()  
+            self.x, self.y = x, y
 
 
     def brushMovingPoint(self, event):
 
         x, y = getScaledPoint(event, self.scale)
         
-        # if (self.x != x) or (self.y != y) : 
+        if (self.x != x) or (self.y != y) : 
 
-        x_btw, y_btw = points_between(self.x, self.y, x, y)
-        print(f"x_btw, {x_btw} y_btw{y_btw}")
+            x_btw, y_btw = points_between(self.x, self.y, x, y)
+            print(f"x_btw, {x_btw} y_btw{y_btw}")
 
-        self.updateLabelandColormap(x_btw, y_btw)
-        self.resize_image()  
-        self.x, self.y = x, y
+            self.updateLabelandColormap(x_btw, y_btw)
+            self.resize_image()  
+            self.x, self.y = x, y
 
          
          

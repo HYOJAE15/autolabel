@@ -79,8 +79,10 @@ class AutoLabelButton :
                 self.rect_end = x+128, y+128
 
             
-            result = inference_segmentor(self.model, self.img[self.rect_start[1]: self.rect_end[1],
+            result = inference_segmentor(self.model_list[self.label_segmentation-1], self.img[self.rect_start[1]: self.rect_end[1],
                                             self.rect_start[0]: self.rect_end[0], :])
+
+            print(f'modelListindex {self.label_segmentation-1}')
 
             cv2.imshow("cropImage", self.img[self.rect_start[1]: self.rect_end[1],
                                             self.rect_start[0]: self.rect_end[0], :])
@@ -94,7 +96,7 @@ class AutoLabelButton :
             x_idx = x_idx + self.rect_start[0]
             y_idx = y_idx + self.rect_start[1]
 
-            self.label[y_idx, x_idx] = 1
+            self.label[y_idx, x_idx] = self.label_segmentation # label_palette 의 인덱스 색깔로 표현
             
             self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
             self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
@@ -140,14 +142,14 @@ class AutoLabelButton :
 
         self.rect_end = x, y
 
-        result = inference_segmentor(self.model, self.img[self.rect_start[1]: y, self.rect_start[0]: x, :])
+        result = inference_segmentor(self.model_list[self.label_segmentation-1], self.img[self.rect_start[1]: y, self.rect_start[0]: x, :])
 
         idx = np.argwhere(result[0] == 1)
         y_idx, x_idx = idx[:, 0], idx[:, 1]
         x_idx = x_idx + self.rect_start[0]
         y_idx = y_idx + self.rect_start[1]
 
-        self.label[y_idx, x_idx] = 1
+        self.label[y_idx, x_idx] = self.label_segmentation
         
         self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
         self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))

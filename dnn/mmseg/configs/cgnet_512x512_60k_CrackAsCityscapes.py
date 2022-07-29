@@ -116,7 +116,7 @@ data = dict(
             dict(type='LoadImageFromFile'),
             dict(
                 type='MultiScaleFlipAug',
-                img_scale=(512, 512),
+                img_scale=(768, 768),
                 flip=False,
                 transforms=[
                     dict(type='Resize', keep_ratio=True),
@@ -140,7 +140,7 @@ data = dict(
             dict(type='LoadImageFromFile'),
             dict(
                 type='MultiScaleFlipAug',
-                img_scale=(512, 512),
+                img_scale=(768, 768),
                 flip=False,
                 transforms=[
                     dict(type='Resize', keep_ratio=True),

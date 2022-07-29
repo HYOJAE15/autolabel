@@ -61,6 +61,7 @@ class MainWindow(QMainWindow, form_class_main,
         self.x = 0 
         self.y = 0 
         self.label_class = 0
+        self.label_segmentation = 1
         self.alpha = 0.5
         self.use_brush = False
         self.use_erase = False
@@ -69,12 +70,31 @@ class MainWindow(QMainWindow, form_class_main,
         self.circle = True
         
 
+        # config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
+        # checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
+        # self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
+
+        config_file_list = ['./dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py', 
+                                   './dnn/mmseg/configs/cgnet_680x680_60k_cityscapes.py' ]
+        checkpoint_file_list = ['./dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth',
+                                        './dnn/mmseg/checkpoints/cgnet_680x680_iter_60000.pth' ]
+ 
+
+
         config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
         checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
         self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
+        config_file_efflorescence = './dnn/mmseg/configs/cgnet_1024x1024_60k_cityscapes.py'
+        checkpoint_file_efflorescence = './dnn/mmseg/checkpoints/cgnet_1024x1024_iter_60000.pth'
+        self.model_efflorescence = init_segmentor(config_file_efflorescence, checkpoint_file_efflorescence,
+                                                                                            device='cuda:0')
         
- 
+        
+
+        self.model_list = [self.model, self.model_efflorescence]
+
+        
         """
         Pallete for Concrete damage dataset
 
@@ -174,7 +194,7 @@ class MainWindow(QMainWindow, form_class_main,
                 # print(f"cityscapedataset 비준수 {self.openFolderPath}")
 
             readFilePath = self.dialog.getOpenFileNames(
-                caption="Add images to current working directory", filter="Images (*.png *.jpg)"
+                caption="Add images to current working directory", filter="Images (*.png *.jpg *.tiff)"
                 )
             images = readFilePath[0]
 
@@ -218,6 +238,7 @@ class MainWindow(QMainWindow, form_class_main,
                     img_filename = os.path.basename(img) # -> basename is file name
                     img_filename = img_filename.replace(' ', '')
                     img_filename = img_filename.replace('.jpg', '.png')
+                    img_filename = img_filename.replace('.tiff', '.png')
                     img_filename = img_filename.replace('.png', '_leftImg8bit.png')
 
                     img_gt_filename = img_filename.replace( '_leftImg8bit.png', '_gtFine_labelIds.png')
@@ -688,7 +709,7 @@ class MainWindow(QMainWindow, form_class_main,
         print(f"self.listWidget.currentRow(){self.listWidget.currentRow()}")
         
         self.label_class = self.listWidget.currentRow()
-
+        self.label_segmentation = self.listWidget.currentRow()
 
 
 if __name__ == "__main__" :

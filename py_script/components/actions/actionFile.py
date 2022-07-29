@@ -11,8 +11,6 @@ from PyQt5.QtCore import *
 from utils.utils import *
 
 
-
-
 class ActionFile :
     def __init__(self) :
         super().__init__()

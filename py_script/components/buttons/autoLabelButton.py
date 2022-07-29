@@ -12,8 +12,8 @@ from PyQt5.QtCore import *
 
 from utils.utils import *
 
-sys.path.append("./dnn/mmseg")
-from mmseg.apis import init_segmentor, inference_segmentor
+sys.path.append("./dnn/mmsegmentation")
+from mmseg.apis import inference_segmentor
 
 
 
@@ -21,10 +21,6 @@ class AutoLabelButton :
     def __init__(self) :
         super().__init__()
 
-        # config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
-        # checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
-
-        # self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
 
     def roi256(self):
@@ -33,6 +29,8 @@ class AutoLabelButton :
         self.roiAutoLabelButton.setChecked(True)
 
         self.use_brush = False
+
+        self.use_erase = False
 
         self.set_roi = False
 
@@ -45,6 +43,8 @@ class AutoLabelButton :
         print(f"self.use_brush {self.use_brush}")
 
         self.use_brush = False
+
+        self.use_erase = False
 
         self.set_roi = True
         
@@ -120,13 +120,13 @@ class AutoLabelButton :
 
         x, y = getScaledPoint(event, self.scale)
 
-        self.rect_start = x, y
+        self.rect_start = [x, y]
 
     def roiMovingPoint(self, event):
 
         x, y = getScaledPoint(event, self.scale)
 
-        self.rect_end = x, y
+        self.rect_end = [x, y]
 
         thickness = 5
 
@@ -139,8 +139,32 @@ class AutoLabelButton :
     def roiReleasePoint(self, event):
 
         x, y = getScaledPoint(event, self.scale)
+    
+        if x < self.rect_start[0] : 
+            temp = x 
+            x = self.rect_start[0]
+            self.rect_start[0] = temp 
+            
+        if y < self.rect_start[1] : 
+            temp = y 
+            y = self.rect_start[1]
+            self.rect_start[1] = temp 
 
-        self.rect_end = x, y
+        self.rect_end = [x, y] 
+
+        if (self.rect_end[0] == self.rect_start[0]) | (self.rect_end[1] == self.rect_start[1]):
+            self.rect_start[0] -= int(128/self.scale)
+            self.rect_start[1] -= int(128/self.scale)  
+
+            self.rect_end[0] += int(128/self.scale) 
+            self.rect_end[1] += int(128/self.scale) 
+
+        self.rect_start[0] = np.clip(self.rect_start[0], 0, self.label.shape[1])
+        self.rect_start[1] = np.clip(self.rect_start[1], 0, self.label.shape[0])
+
+        self.rect_end[0] = np.clip(self.rect_end[0], 0, self.label.shape[1])
+        self.rect_end[1] = np.clip(self.rect_end[1], 0, self.label.shape[0])
+            
 
         result = inference_segmentor(self.model_list[self.label_segmentation-1], self.img[self.rect_start[1]: y, self.rect_start[0]: x, :])
 

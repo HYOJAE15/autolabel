@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1143</width>
-    <height>590</height>
+    <width>1397</width>
+    <height>620</height>
    </rect>
   </property>
   <property name="focusPolicy">
@@ -336,8 +336,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>628</width>
-                 <height>449</height>
+                 <width>796</width>
+                 <height>479</height>
                 </rect>
                </property>
                <property name="layoutDirection">
@@ -395,6 +395,16 @@
                </size>
               </property>
              </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="labelOpacityCheckBox">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QLabel" name="label_2">
@@ -462,7 +472,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1143</width>
+     <width>1397</width>
      <height>21</height>
     </rect>
    </property>

@@ -15,23 +15,26 @@ from PyQt5.QtCore import *
 
 from utils.utils import *
 
-from components.dialogs.brushMenuDialog import BrushMenu
-from components.dialogs.eraseMenuDialog import EraseMenu
-from components.dialogs.newProjectDialog import newProjectDialog
-from components.dialogs.setCategoryDialog import setCategoryDialog
+
+from components.actions.actionFile import ActionFile
 
 from components.buttons.autoLabelButton import AutoLabelButton
 from components.buttons.brushButton import BrushButton
 from components.buttons.eraseButton import EraseButton
 from components.buttons.zoomButton import ZoomButton
 
-from components.actions.actionFile import ActionFile
+from components.dialogs.brushMenuDialog import BrushMenu
+from components.dialogs.eraseMenuDialog import EraseMenu
+from components.dialogs.newProjectDialog import newProjectDialog
+from components.dialogs.setCategoryDialog import setCategoryDialog
+
+from components.opener.dialogOpener import dialogOpener
 
 from components.widgets.treeView import TreeView
 
 
-sys.path.append("./dnn/mmseg")
-from mmseg.apis import init_segmentor, inference_segmentor
+sys.path.append("./dnn/mmsegmentation")
+from mmseg.apis import init_segmentor
 
 
 # Select folder "autolabel"
@@ -45,7 +48,8 @@ form_class_main = uic.loadUiType(form)[0]
 
 class MainWindow(QMainWindow, form_class_main,
                  AutoLabelButton, BrushButton, EraseButton,
-                                       ActionFile, TreeView) :
+                 dialogOpener, 
+                 ActionFile, TreeView) :
     def __init__(self) :
         super().__init__()
         self.setupUi(self)
@@ -70,9 +74,10 @@ class MainWindow(QMainWindow, form_class_main,
         self.circle = True
         
 
-        # config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
-        # checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
-        # self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
+        config_file = './dnn/checkpoints/2022.01.06 cgnet general crack 2048/cgnet_2048x2048_60k_CrackAsCityscapes.py'
+        checkpoint_file = './dnn/checkpoints/2022.01.06 cgnet general crack 2048/iter_60000.pth'
+        
+        self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
 
         config_file_list = ['./dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py', 
                                    './dnn/mmseg/configs/cgnet_680x680_60k_cityscapes.py' ]
@@ -128,7 +133,6 @@ class MainWindow(QMainWindow, form_class_main,
         self.ControlKey = False
         self.scale = 1
         
-
         # 3. brush & erase tools
         self.brushButton.clicked.connect(self.openBrushDialog)
         self.eraseButton.clicked.connect(self.openEraseDialog)
@@ -147,6 +151,7 @@ class MainWindow(QMainWindow, form_class_main,
 
         # 6. label opacity
         self.lableOpacitySlider.valueChanged.connect(self.showHorizontalSliderValue)
+        self.labelOpacityCheckBox.stateChanged.connect(self.labelOpacityOnOff)
 
         # 7. auto label tools 
         self.roiMenu = QMenu()
@@ -176,12 +181,9 @@ class MainWindow(QMainWindow, form_class_main,
     ########################
 
 
-    # addNewImage 버튼 클릭 후 아무 파일 도 선택 안할 시 에러 
     def addNewImages(self):
         
         try :
-
-            # self.imgPath = self.openFolderPath
 
             if self.openFolderPath :
                 self.imgPath = self.openFolderPath
@@ -273,8 +275,6 @@ class MainWindow(QMainWindow, form_class_main,
         elif self.use_erase :
             x, y = self.applyEraseSize(x, y)
 
-        
-        # print(f" updateLabelColormap {x, y}")
 
         try : 
             print(f"label_class {self.label_class}")
@@ -293,77 +293,7 @@ class MainWindow(QMainWindow, form_class_main,
         except BaseException as e : 
             print(e)
 
-    ########################### 
-    ### Mouse Event Handler ###
-    ###########################
-
-
-    def openBrushDialog(self, event):
-
-        if hasattr(self, 'brushMenu'):
-            self.brushMenu.close()
-
-        self.use_brush = True
-        self.brushButton.setChecked(True)
-        self.roiAutoLabelButton.setChecked(False)
-        print(f" openBrushDialog {self.brushSize}")
-        self.brushMenu = BrushMenu()
-        self.brushMenu.lineEdit.setText(f'{self.brushSize} px')
-        if self.brushSize > 2 :
-            print("brushSize > 2") 
-            self.brushMenu.horizontalSlider.setValue(self.brushSize)
-            self.brushMenu.lineEdit.setText(f'{self.brushSize} px')
-
-        self.initBrushTools()
-        self.brushMenu.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.brushMenu.show()
-
-        #좌표를 받고 싶다면 mousePressEvent 활용
-        self.brushMenu.move(self.pos())
-
-        if self.circle :
-            self.brushMenu.circleButton.setChecked(True)
-            self.brushMenu.squareButton.setChecked(False)
-        elif self.circle == False :
-            self.brushMenu.squareButton.setChecked(True)
-            self.brushMenu.circleButton.setChecked(False)
-
-        
-    def openEraseDialog(self, event):
-        print("erase")
-        self.eraseButton.setChecked(True)
-        self.use_erase = True
-        self.eraseMenu = EraseMenu()
-        self.eraseMenu.eraselineEdit.setText(f'{self.eraseSize} px')
-        if self.eraseSize > 2 :
-            print("eraseSize > 2") 
-            self.eraseMenu.erasehorizontalSlider.setValue(self.eraseSize)
-            self.eraseMenu.eraselineEdit.setText(f'{self.eraseSize} px')
-        
-        self.eraseMenu.move(self.pos())
-        self.initEraseTools()
-        self.eraseMenu.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.eraseMenu.show()
-
-
-                        
-    def initEraseTools(self):
-        self.eraseMenu.erasehorizontalSlider.valueChanged.connect(self.setEraseSize)
-
-    def initBrushTools(self):
-        self.brushMenu.horizontalSlider.valueChanged.connect(self.setBrushSize)
-        self.brushMenu.circleButton.clicked.connect(self.setBrushCircle)
-        self.brushMenu.squareButton.clicked.connect(self.setBrushSquare)
-
-    def setBrushCircle(self):
-        self.circle = True
-        self.brushMenu.circleButton.setChecked(True)
-        self.brushMenu.squareButton.setChecked(False)
-
-    def setBrushSquare(self):
-        self.circle = False
-        self.brushMenu.squareButton.setChecked(True)
-        self.brushMenu.circleButton.setChecked(False)
+    
 
 
     def openExistingProject(self):
@@ -409,6 +339,7 @@ class MainWindow(QMainWindow, form_class_main,
         except FileNotFoundError as e:
             print(e)
 
+
     def createNewProjectDialog(self, event):
             # new_project_info 를 딕셔너리 자료형으로 설정 한다.
         self.new_project_info = {}
@@ -438,14 +369,6 @@ class MainWindow(QMainWindow, form_class_main,
         self.new_project_info['folder_path'] = readFolderPath
         print(self.new_project_info)
 
-
-    def openCategoryInfoDialog(self, event):
-
-        self.newProjectDialog.close()
-
-        self.setCategoryDialog = setCategoryDialog()
-        self.setCategoryDialog.createButton.clicked.connect(self.createProjectHeader)
-        self.setCategoryDialog.exec()
 
     def createProjectHeader(self):
 
@@ -532,81 +455,124 @@ class MainWindow(QMainWindow, form_class_main,
         # turn on : 단축키 press 
         # turn off : 한번더 press 
     def keyPressEvent(self, event):
-
+        print(event.key())
             # zoom
         if event.key() == Qt.Key_Control:
             self.ControlKey = True
-
             # handMove
             # h_key 한번 press 후 마우스 로 이동 
         elif event.key() == Qt.Key_H: 
             self.hKey = True
-            # QApplication.setOverrideCursor(self.custom_cursor)
-            
+            print(QCursor().shape())
+            QApplication.setOverrideCursor(Qt.OpenHandCursor)
 
-            # Brush
-            # B_key 한번 press 후 Brush 기능 키고 끄자 
-        elif event.key() == 66 : # B Key
-            print("B")
+        elif event.key() == 65 : # A Key
             
-            if self.use_brush == True :
-                self.use_brush = False
-                self.brushMenu.close()
-                self.brushButton.setChecked(False)
+            self.set_roi_256 = 1-self.set_roi_256
 
-            elif self.use_erase :
-                self.openBrushDialog(event)
+            if self.set_roi_256 : 
+                self.roiAutoLabelButton.setChecked(True)
+
+            else : 
+                self.roiAutoLabelButton.setChecked(False)
+
+
+            if self.use_erase : 
                 self.use_erase = False
                 self.eraseButton.setChecked(False)
+
+            if  hasattr(self, 'eraseMenu'):   
                 self.eraseMenu.close()
 
-            else :
-                self.openBrushDialog(event)
-
+            if self.use_brush :
+                self.use_brush = False
+                self.brushButton.setChecked(False)
+                
+            if hasattr(self, 'brushMenu'):
+                self.brushMenu.close()
                 
 
         
+        elif event.key() == 66 : # B Key
+            print("B")
+
+            if self.use_brush == True :
+                self.use_brush = False
+                self.brushButton.setChecked(False)
+
+                if hasattr(self, 'brushMenu'):
+                    self.brushMenu.close()  
+
+            else :
+                self.openBrushDialog(event)
+                
+            if self.use_erase : 
+                self.use_erase = False
+                self.eraseButton.setChecked(False)
+                
+            if  hasattr(self, 'eraseMenu'):   
+                self.eraseMenu.close()
+                
+            if self.set_roi_256:
+                self.set_roi_256 = False
+                self.roiAutoLabelButton.setChecked(False)
+
+            if self.set_roi:
+                self.set_roi = False
+                
         elif event.key() == 69 : # E Key
             print("E")
 
             if self.use_erase == True :
                 self.use_erase = False
-                self.eraseMenu.close()
                 self.eraseButton.setChecked(False)
 
-            elif self.use_brush :
-                self.openEraseDialog(event)
-                self.use_brush = False
-                self.brushButton.setChecked(False)
-                self.brushMenu.close()
+                if  hasattr(self, 'eraseMenu'):   
+                    self.eraseMenu.close()
 
             else :
                 self.openEraseDialog(event)
 
+            if self.use_brush :
+                self.use_brush = False
+                self.brushButton.setChecked(False)
 
+            if hasattr(self, 'brushMenu'):
+                self.brushMenu.close()
 
+            if self.set_roi_256:
+                self.set_roi_256 = False
+                self.roiAutoLabelButton.setChecked(False)
 
+            if self.set_roi:
+                self.set_roi = False
 
-            # Delete Image
-        elif event.key() == 16777223 : # delete key
-            print(event.key())
-            
-            print(self.labelPath)
-            print(self.imgPath)
-            os.remove(self.imgPath)    
-            os.remove(self.labelPath)
+        elif event.key() == 81: 
+            self.labelOpacityCheckBox.setChecked(1-self.labelOpacityCheckBox.isChecked())
+            self.labelOpacityOnOff()
+            # Brush
+            # B_key 한번 press 후 Brush 기능 키고 끄자 
 
-            # Save Image
+        # Save Image
         elif event.key() == 83 : # S key
             if self.ControlKey : 
                 
-                is_success, label_to_file = cv2.imencode(".png", self.label)
+                _, label_to_file = cv2.imencode(".png", self.label)
                 label_to_file.tofile(self.labelPath)
 
                 print('Save')
                 self.saveImgName = os.path.basename(self.imgPath)
                 print(self.saveImgName)
                 self.situationLabel.setText(self.saveImgName + "을(를) 저장하였습니다.")
+
+        # Delete Image
+        elif event.key() == 16777223 : # qdelete key
+            print(event.key())
+            
+            print(self.labelPath)
+            print(self.imgPath)
+            os.remove(self.imgPath)    
+            os.remove(self.labelPath)
                 
         else :
             print(event.key())
@@ -621,17 +587,17 @@ class MainWindow(QMainWindow, form_class_main,
             # handMove
         elif event.key() == Qt.Key_H:
             self.hKey = False
-            # QApplication.restoreOverrideCursor()
+            QApplication.restoreOverrideCursor()
             
         # brush 기능 중 화면 이동하면 브러시 작동한다
         # mousePress 및 Release def 로 수정
     def scrollAreaMousePress(self, event):
-        
 
         self.hand_last_point = QPoint(QCursor.pos().x(), QCursor.pos().y())
         print(f"scrollAreaMousePress's pos {self.hand_last_point}")
         
     def scrollAreaMouseMove(self, event):
+
 
         delta_y = self.hand_last_point.y() - QCursor.pos().y()
         delta_x = self.hand_last_point.x() -  QCursor.pos().x() 
@@ -698,11 +664,24 @@ class MainWindow(QMainWindow, form_class_main,
 
     def showHorizontalSliderValue(self):
 
+        self.labelOpacityCheckBox.setChecked(True)
+
         if abs(self.alpha-(self.lableOpacitySlider.value() / 100)) > 0.03 :
             self.alpha = self.lableOpacitySlider.value() / 100
             self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
             self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
             self.resize_image()    
+
+    def labelOpacityOnOff(self):
+        
+        if self.labelOpacityCheckBox.isChecked():
+            self.alpha = self.lableOpacitySlider.value() / 100
+        else : 
+            self.alpha = 1 
+        
+        self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
+        self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+        self.resize_image()    
 
     def getListWidgetIndex (self):
 

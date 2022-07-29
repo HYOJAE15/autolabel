@@ -17,8 +17,6 @@ class EraseMenu(QDialog, form_class_eraseMenu):
         self.erasehorizontalSlider.valueChanged.connect(self.eraseChangeSliderValueText)
 
 
-
-
     def eraseChangeSliderValueText(self):
         number = self.erasehorizontalSlider.value()
 

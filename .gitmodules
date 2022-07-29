@@ -1,0 +1,3 @@
+[submodule "dnn/mmsegmentation"]
+	path = dnn/mmsegmentation
+	url = https://github.com/bhyun-kim/mmsegmentation.git

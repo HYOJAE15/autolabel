@@ -17,8 +17,6 @@ class BrushMenu(QDialog, form_class_brushMenu):
         self.horizontalSlider.valueChanged.connect(self.changeSliderValueText)
         
         
-
-
     def changeSliderValueText(self):
         number = self.horizontalSlider.value()
 

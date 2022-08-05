@@ -1,10 +1,4 @@
 
-from email import utils
-import sys
-import cv2
-import sys
-
-from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -63,15 +57,15 @@ class TreeView() :
             
             if 'png' in dotSplit_imgPath :
 
-                self.img = imread(self.imgPath)
-
                 self.labelPath = self.imgPath.replace('/leftImg8bit/', '/gtFine/')
                 self.labelPath = self.labelPath.replace( '_leftImg8bit.png', '_gtFine_labelIds.png')
 
+                self.img = imread(self.imgPath)
                 self.label = imread(self.labelPath)
-                print('self.label shape', self.label.shape)
+
+                self.layers = createLayersFromLabel(self.label, len(self.label_palette))
                 self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
-            
+                
                 self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
                 self.scale = self.scrollArea.height() / self.pixmap.height()
 
@@ -81,7 +75,6 @@ class TreeView() :
                 self.saveImgName = None
                 self.brushMemory = None
 
-                
 
             else :
                 pass

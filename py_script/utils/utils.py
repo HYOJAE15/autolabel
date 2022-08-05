@@ -23,6 +23,15 @@ def imwrite(path, img):
     label_to_file.tofile(path)
     
 
+def createLayersFromLabel(label, num_class):
+
+    layers = []
+
+    for idx in range(num_class):
+        layers.append(label == idx)
+        
+    return layers
+
 
 def getScaledPoint(event, scale):
     """Get scaled point coordinate 

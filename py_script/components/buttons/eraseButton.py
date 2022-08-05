@@ -66,7 +66,12 @@ class EraseButton :
         if (self.x != x) or (self.y != y) :
             
             self.eraseMemory = True
-            self.updateLabelandColormap([x], [y])
+
+            x_btw, y_btw = self.applyEraseSize([x], [y])
+            self.updateLayers(x_btw, y_btw)
+            self.updateLabelFromLayers(x_btw, y_btw)
+            self.updateColormapFromLabel(x_btw, y_btw)
+            # self.updateLabelandColormap([x], [y])
             self.resize_image()  
             self.x, self.y = x, y
 
@@ -80,6 +85,11 @@ class EraseButton :
             x_btw, y_btw = points_between(self.x, self.y, x, y)
             print(f"x_btw, {x_btw} y_btw{y_btw}")
 
-            self.updateLabelandColormap(x_btw, y_btw)
+            
+            x_btw, y_btw = self.applyEraseSize(x_btw, y_btw)
+            # self.updateLabelandColormap(x_btw, y_btw)
+            self.updateLayers(x_btw, y_btw)
+            self.updateLabelFromLayers(x_btw, y_btw)
+            self.updateColormapFromLabel(x_btw, y_btw)
             self.resize_image()  
             self.x, self.y = x, y

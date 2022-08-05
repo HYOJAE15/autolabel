@@ -13,6 +13,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 
+from scipy import ndimage
+
 from utils.utils import *
 
 
@@ -36,7 +38,7 @@ from components.widgets.treeView import TreeView
 sys.path.append("./dnn/mmsegmentation")
 from mmseg.apis import init_segmentor
 
-
+import time
 # Select folder "autolabel"
 # MainWindow UI
 project_ui = '../../ui_design/mainWindow.ui'
@@ -73,27 +75,19 @@ class MainWindow(QMainWindow, form_class_main,
         self.set_roi_256 = False
         self.circle = True
         
-
+        
         config_file = './dnn/checkpoints/2022.01.06 cgnet general crack 2048/cgnet_2048x2048_60k_CrackAsCityscapes.py'
         checkpoint_file = './dnn/checkpoints/2022.01.06 cgnet general crack 2048/iter_60000.pth'
-        
-        self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
-
-        config_file_list = ['./dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py', 
-                                   './dnn/mmseg/configs/cgnet_680x680_60k_cityscapes.py' ]
-        checkpoint_file_list = ['./dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth',
-                                        './dnn/mmseg/checkpoints/cgnet_680x680_iter_60000.pth' ]
- 
+        self.model = init_segmentor(config_file, 
+                                    checkpoint_file, 
+                                    device='cuda:0')
 
 
-        config_file = './dnn/mmseg/configs/cgnet_512x512_60k_CrackAsCityscapes.py'
-        checkpoint_file = './dnn/mmseg/checkpoints/crack_cgnet_2048x2048_iter_60000.pth'
-        self.model = init_segmentor(config_file, checkpoint_file, device='cuda:0')
-
-        config_file_efflorescence = './dnn/mmseg/configs/cgnet_1024x1024_60k_cityscapes.py'
-        checkpoint_file_efflorescence = './dnn/mmseg/checkpoints/cgnet_1024x1024_iter_60000.pth'
-        self.model_efflorescence = init_segmentor(config_file_efflorescence, checkpoint_file_efflorescence,
-                                                                                            device='cuda:0')
+        config_file_efflorescence = './dnn/checkpoints/2022.07.28_cgnet_1024x1024_concrete_efflorescence/cgnet_1024x1024_60k_cityscapes.py'
+        checkpoint_file_efflorescence = './dnn/checkpoints/2022.07.28_cgnet_1024x1024_concrete_efflorescence/cgnet_1024x1024_iter_60000.pth'
+        self.model_efflorescence = init_segmentor(config_file_efflorescence, 
+                                                  checkpoint_file_efflorescence,
+                                                  device='cuda:0')
         
         
 
@@ -106,10 +100,6 @@ class MainWindow(QMainWindow, form_class_main,
         background, crack, rebar exposure,
         spalling, efflorescence  
         """
-        self.label_palette = np.array([
-            [0, 0, 0  ], [255, 0, 0  ], [255, 255, 0],
-            [0, 0, 255], [255, 0, 255]
-            ])
 
         # treeview setting 
         self.openFolderPath = None
@@ -266,7 +256,43 @@ class MainWindow(QMainWindow, form_class_main,
         except UnboundLocalError as e :
             print(e)
 
-        
+
+    def updateLayers(self, x, y):
+        start_time = time.time()
+        try : 
+            print(f"label_class {self.label_class}")
+            print(type(self.label_class))
+            if self.use_brush :
+                self.layers[self.label_class][y, x] = 1
+
+            elif self.use_erase :
+                self.layers[self.label_class][y, x] = 0
+            
+        except BaseException as e : 
+            print(e)
+        print("---updateLayers %s seconds ---" % (time.time() - start_time))
+
+
+    def updateLabelFromLayers(self, x, y):
+        start_time = time.time()
+        self.label[y, x] = 0
+        temp_label = self.label[y, x]
+        for idx in reversed(range(1, len(self.layers))): 
+            temp_label = np.where(self.layers[idx][y, x], idx, temp_label) 
+        self.label[y, x] = temp_label
+
+        print("---updateLabelFromLayers %s seconds ---" % (time.time() - start_time))
+
+    def updateColormapFromLabel(self, x, y):
+        start_time = time.time()
+        try :             
+            self.colormap[y, x] = self.img[y, x] * self.alpha + self.label_palette[self.label[y, x]] * (1-self.alpha)
+
+            self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+        except BaseException as e : 
+            print(e)
+        print("---updateLabelFromLayers %s seconds ---" % (time.time() - start_time))
+
 
     def updateLabelandColormap(self, x, y):
         
@@ -413,7 +439,6 @@ class MainWindow(QMainWindow, form_class_main,
 
 
     def mouseMoveEvent(self, event):
-        # print("mouseMoveEvent")
 
         if self.hKey : 
             self.scrollAreaMouseMove(event)
@@ -428,7 +453,6 @@ class MainWindow(QMainWindow, form_class_main,
             self.roiMovingPoint(event)
 
     def mouseReleaseEvent(self, event): 
-        # print("mouseReleaseEvent")
 
         if self.hKey :
             pass
@@ -547,7 +571,21 @@ class MainWindow(QMainWindow, form_class_main,
             if self.set_roi:
                 self.set_roi = False
 
-        elif event.key() == 81: 
+        elif event.key() == 70 : # f Key
+            print("filling works")
+            self.layers[self.label_class] = ndimage.binary_fill_holes(self.layers[self.label_class])
+
+            for idx in reversed(range(1, len(self.layers))): 
+                self.label = np.where(self.layers[idx], idx, self.label) 
+
+            self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
+                
+            self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+
+            self.resize_image()
+            
+
+        elif event.key() == 81: # Q key
             self.labelOpacityCheckBox.setChecked(1-self.labelOpacityCheckBox.isChecked())
             self.labelOpacityOnOff()
             # Brush
@@ -557,8 +595,7 @@ class MainWindow(QMainWindow, form_class_main,
         elif event.key() == 83 : # S key
             if self.ControlKey : 
                 
-                _, label_to_file = cv2.imencode(".png", self.label)
-                label_to_file.tofile(self.labelPath)
+                imwrite(self.labelPath, self.label)
 
                 print('Save')
                 self.saveImgName = os.path.basename(self.imgPath)

@@ -65,7 +65,11 @@ class BrushButton :
         if (self.x != x) or (self.y != y) :
             
             self.brushMemory = True
-            self.updateLabelandColormap([x], [y])
+            # self.updateLabelandColormap([x], [y])
+            x_btw, y_btw = self.applyBrushSize([x], [y])
+            self.updateLayers(x_btw, y_btw)
+            self.updateLabelFromLayers(x_btw, y_btw)
+            self.updateColormapFromLabel(x_btw, y_btw)
             self.resize_image()  
             self.x, self.y = x, y
 
@@ -81,7 +85,11 @@ class BrushButton :
 
             # update layers (x_btw, y_btw)
             # update label and Colormap --> refer to the updated images and colormap
-            self.updateLabelandColormap(x_btw, y_btw)
+            x_btw, y_btw = self.applyBrushSize(x_btw, y_btw)
+            self.updateLayers(x_btw, y_btw)
+            self.updateLabelFromLayers(x_btw, y_btw)
+            self.updateColormapFromLabel(x_btw, y_btw)
+            # self.updateLabelandColormap(x_btw, y_btw)
             self.resize_image()  
             self.x, self.y = x, y
 

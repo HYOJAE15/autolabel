@@ -79,6 +79,8 @@ class BrushButton :
             x_btw, y_btw = points_between(self.x, self.y, x, y)
             print(f"x_btw, {x_btw} y_btw{y_btw}")
 
+            # update layers (x_btw, y_btw)
+            # update label and Colormap --> refer to the updated images and colormap
             self.updateLabelandColormap(x_btw, y_btw)
             self.resize_image()  
             self.x, self.y = x, y

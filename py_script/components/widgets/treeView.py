@@ -63,13 +63,12 @@ class TreeView() :
             
             if 'png' in dotSplit_imgPath :
 
-                self.img = cv2.imdecode(np.fromfile(self.imgPath, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
-                self.img = cv2.cvtColor(self.img, cv2.COLOR_BGR2RGB) 
+                self.img = imread(self.imgPath)
 
                 self.labelPath = self.imgPath.replace('/leftImg8bit/', '/gtFine/')
                 self.labelPath = self.labelPath.replace( '_leftImg8bit.png', '_gtFine_labelIds.png')
 
-                self.label = cv2.imdecode(np.fromfile(self.labelPath, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+                self.label = imread(self.labelPath)
                 print('self.label shape', self.label.shape)
                 self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
             
@@ -91,7 +90,6 @@ class TreeView() :
         except: 
             print("Error Occured")
     
-
 
     def askSave(self) :
         

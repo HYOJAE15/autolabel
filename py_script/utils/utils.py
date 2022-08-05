@@ -1,10 +1,27 @@
 import os 
 import sys
 
+import cv2
+
 import numpy as np 
 
 from PyQt5.QtGui import QImage
 from PyQt5.QtCore import QPoint
+
+
+def imread(imgPath):
+    img = cv2.imdecode(np.fromfile(imgPath, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+
+    if img.ndim == 3 : 
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) 
+    return img
+
+
+def imwrite(path, img): 
+    _, ext = os.path.splitext(path)
+    _, label_to_file = cv2.imencode(ext, img)
+    label_to_file.tofile(path)
+    
 
 
 def getScaledPoint(event, scale):

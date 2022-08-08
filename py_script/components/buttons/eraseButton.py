@@ -43,6 +43,10 @@ class EraseButton :
         for x, y in zip(X, Y):
             _x = x + _X
             _y = y + _Y
+
+            _x = np.clip(_x, 0, self.label.shape[1]-1)
+            _y = np.clip(_y, 0, self.label.shape[0]-1)
+            
             return_x += _x.tolist()
             return_y += _y.tolist()
 

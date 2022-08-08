@@ -64,6 +64,7 @@ class TreeView() :
                 self.label = imread(self.labelPath)
 
                 self.layers = createLayersFromLabel(self.label, len(self.label_palette))
+                print(f"layer!{self.layers}")
                 self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
                 
                 self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))

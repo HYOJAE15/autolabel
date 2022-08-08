@@ -33,7 +33,7 @@ class BrushButton :
         _Y, _X = np.mgrid[-width:width, -width:width]
         _Y, _X = _Y.flatten(), _X.flatten()
         _Y, _X = np.squeeze(_Y), np.squeeze(_X)
-
+        
         if self.circle :
             dist = [np.sqrt(_x**2 + _y**2) for _x, _y in zip(_Y, _X)]
             _Y =  [_y for idx, _y in enumerate(_Y) if dist[idx] < width]
@@ -43,6 +43,9 @@ class BrushButton :
         for x, y in zip(X, Y):
             _x = x + _X
             _y = y + _Y
+
+            _x = np.clip(_x, 0, self.label.shape[1]-1)
+            _y = np.clip(_y, 0, self.label.shape[0]-1)
             return_x += _x.tolist()
             return_y += _y.tolist()
 
@@ -67,6 +70,7 @@ class BrushButton :
             self.brushMemory = True
             # self.updateLabelandColormap([x], [y])
             x_btw, y_btw = self.applyBrushSize([x], [y])
+            print(f"apply scaled points list{x_btw, y_btw}")
             self.updateLayers(x_btw, y_btw)
             self.updateLabelFromLayers(x_btw, y_btw)
             self.updateColormapFromLabel(x_btw, y_btw)

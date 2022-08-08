@@ -230,6 +230,7 @@ class MainWindow(QMainWindow, form_class_main,
                     img_filename = os.path.basename(img) # -> basename is file name
                     img_filename = img_filename.replace(' ', '')
                     img_filename = img_filename.replace('.jpg', '.png')
+                    img_filename = img_filename.replace('.JPG', '.png')
                     img_filename = img_filename.replace('.tiff', '.png')
                     img_filename = img_filename.replace('.png', '_leftImg8bit.png')
 

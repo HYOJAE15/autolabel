@@ -28,7 +28,6 @@ def createLayersFromLabel(label, num_class):
     layers = []
 
     for idx in range(num_class):
-        print(f"index {idx}")
         layers.append(label == idx)
         
     return layers

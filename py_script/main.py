@@ -1,9 +1,11 @@
 import sys
+from tabnanny import check
 import cv2
 
 import json
 import os
 
+from copy import deepcopy
 
 import numpy as np 
 
@@ -34,6 +36,8 @@ from components.opener.dialogOpener import dialogOpener
 
 from components.widgets.treeView import TreeView
 
+from components.model.concreteDamage import DnnModel
+
 
 sys.path.append("./dnn/mmsegmentation")
 from mmseg.apis import init_segmentor
@@ -58,8 +62,6 @@ class MainWindow(QMainWindow, form_class_main,
 
         #### Attributes #### 
         
-        # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-
         self.brushSize = 2
         self.eraseSize = 2
         self.ver_scale = 1
@@ -76,31 +78,8 @@ class MainWindow(QMainWindow, form_class_main,
         self.circle = True
         
         
-        config_file = './dnn/checkpoints/2022.01.06 cgnet general crack 2048/cgnet_2048x2048_60k_CrackAsCityscapes.py'
-        checkpoint_file = './dnn/checkpoints/2022.01.06 cgnet general crack 2048/iter_60000.pth'
-        self.model = init_segmentor(config_file, 
-                                    checkpoint_file, 
-                                    device='cuda:0')
-
-
-        config_file_efflorescence = './dnn/checkpoints/2022.07.28_cgnet_1024x1024_concrete_efflorescence/cgnet_1024x1024_60k_cityscapes.py'
-        checkpoint_file_efflorescence = './dnn/checkpoints/2022.07.28_cgnet_1024x1024_concrete_efflorescence/cgnet_1024x1024_iter_60000.pth'
-        self.model_efflorescence = init_segmentor(config_file_efflorescence, 
-                                                  checkpoint_file_efflorescence,
-                                                  device='cuda:0')
         
         
-
-        self.model_list = [self.model, self.model_efflorescence]
-
-        
-        """
-        Pallete for Concrete damage dataset
-
-        background, crack, rebar exposure,
-        spalling, efflorescence  
-        """
-
         # treeview setting 
         self.openFolderPath = None
         self.imgPath = None
@@ -138,7 +117,9 @@ class MainWindow(QMainWindow, form_class_main,
 
         # 5. listWidget
         self.listWidget.itemClicked.connect(self.getListWidgetIndex)
-
+        self.listWidget.itemDoubleClicked.connect(self.getListWidgetCheckState)
+        self.listWidget.itemChanged.connect(self.LayerOnOff)
+        
         # 6. label opacity
         self.lableOpacitySlider.valueChanged.connect(self.showHorizontalSliderValue)
         self.labelOpacityCheckBox.stateChanged.connect(self.labelOpacityOnOff)
@@ -147,6 +128,7 @@ class MainWindow(QMainWindow, form_class_main,
         self.roiMenu = QMenu()
         self.roiMenu.addAction("256*256", self.roi256)
         self.roiMenu.addAction("Set Rectangle", self.roiRec)
+        self.roiMenu.addAction("Full image", self.roiFull)
         self.roiAutoLabelButton.setMenu(self.roiMenu)
         self.roiAutoLabelButton.clicked.connect(self.showRoiMenu)
         #self.roiAutoLabelButton.clicked.connect(self.runRoiAutoLabel)
@@ -156,6 +138,9 @@ class MainWindow(QMainWindow, form_class_main,
         self.icon = QPixmap("./Icon/square.png")
         self.scaled_icon = self.icon.scaled(QSize(5, 5), Qt.KeepAspectRatio)
         self.custom_cursor = QCursor(self.scaled_icon)
+
+        # 9. Layer View Mode 
+        self.layerViewCheckBox.stateChanged.connect(self.layerViewMode)
 
 
     def storeXY(self, event):
@@ -258,11 +243,13 @@ class MainWindow(QMainWindow, form_class_main,
             print(e)
 
 
+    def layerViewMode(self):
+        pass
+
     def updateLayers(self, x, y):
-        start_time = time.time()
+        
         try : 
             print(f"label_class {self.label_class}")
-            print(type(self.label_class))
             if self.use_brush :
                 self.layers[self.label_class][y, x] = 1
 
@@ -271,29 +258,30 @@ class MainWindow(QMainWindow, form_class_main,
             
         except BaseException as e : 
             print(e)
-        print("---updateLayers %s seconds ---" % (time.time() - start_time))
-
+        
 
     def updateLabelFromLayers(self, x, y):
-        start_time = time.time()
         self.label[y, x] = 0
         temp_label = self.label[y, x]
-        for idx in reversed(range(1, len(self.layers))): 
-            temp_label = np.where(self.layers[idx][y, x], idx, temp_label) 
+        print(f"bf : {temp_label}")
+        for idx in reversed(range(1, len(self.layers))):
+            
+            print(f"layer!! {self.layers[idx][y, x]} ")
+             
+            temp_label = np.where(self.layers[idx][y, x], idx, temp_label)
+            print(f"af : {temp_label}") 
         self.label[y, x] = temp_label
+        print(f"lf {temp_label}")
 
-        print("---updateLabelFromLayers %s seconds ---" % (time.time() - start_time))
-
+        
     def updateColormapFromLabel(self, x, y):
-        start_time = time.time()
         try :             
             self.colormap[y, x] = self.img[y, x] * self.alpha + self.label_palette[self.label[y, x]] * (1-self.alpha)
 
             self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
         except BaseException as e : 
             print(e)
-        print("---updateLabelFromLayers %s seconds ---" % (time.time() - start_time))
-
+        
 
     def updateLabelandColormap(self, x, y):
         
@@ -360,8 +348,15 @@ class MainWindow(QMainWindow, form_class_main,
                 iconPixmap.fill(QColor(color[0], color[1], color[2]))
                 self.listWidget.item(idx).setIcon(QIcon(iconPixmap))
                 self.label_palette.append(color)
+                print(f"idx{idx}")
+                self.listWidget.item(idx).setCheckState(Qt.Checked)
+                # self.listWidgetCheckBox = QListWidgetItem()
+                # self.listWidgetCheckBox.setCheckState(Qt.Checked)
+                # self.listWidget.addItem(self.listWidgetCheckBox)
 
             self.label_palette = np.array(self.label_palette)
+            print(f"label_palette : {self.label_palette}")
+            print(f"palette type : {type(self.label_palette)}")
 
         except FileNotFoundError as e:
             print(e)
@@ -515,6 +510,9 @@ class MainWindow(QMainWindow, form_class_main,
                 
             if hasattr(self, 'brushMenu'):
                 self.brushMenu.close()
+
+            if self.ControlKey :
+                self.roiFull()
                 
 
         
@@ -604,7 +602,7 @@ class MainWindow(QMainWindow, form_class_main,
                 self.situationLabel.setText(self.saveImgName + "을(를) 저장하였습니다.")
 
         # Delete Image
-        elif event.key() == 16777223 : # qdelete key
+        elif event.key() == 16777223 : # Delete key
             print(event.key())
             
             print(self.labelPath)
@@ -728,7 +726,76 @@ class MainWindow(QMainWindow, form_class_main,
         self.label_class = self.listWidget.currentRow()
         self.label_segmentation = self.listWidget.currentRow()
 
+        if self.use_brush :
+            print("Brush")
 
+        elif self.set_roi or self.set_roi_256 :
+            
+            if self.label_segmentation == 1 :
+                DnnModel.crackModel(self)
+
+            elif self.label_segmentation == 2 :
+                DnnModel.efflorescenceModel(self)
+
+            elif self.label_segmentation == 3 :
+                DnnModel.rebarExposureModel(self)
+                
+            elif self.label_segmentation == 4 :
+                DnnModel.spallingModel(self)
+            
+
+
+
+
+        
+        # listWidget 에서 class를 double click 시 checkBox 상태 변환과 layer on, off 
+    def getListWidgetCheckState(self):
+        print("Double Clicked!!")
+        print(self.listWidget.item(self.label_class).checkState())
+        self.listWidgetCheckState = self.listWidget.item(self.label_class).checkState()
+        if self.listWidgetCheckState==2 :
+
+            self.listWidget.item(self.label_class).setCheckState(Qt.Unchecked)
+            
+            self.layer_palette = self.label_palette
+            self.layer_palette_idx = self.layer_palette[self.label_class]
+            print(f"idx : {self.layer_palette_idx}")
+            self.layer_palette[self.label_class]=0
+            print(f"layer_palette : {self.layer_palette}")
+            print(f"label_palette : {self.label_palette}")
+
+            print(f"idx : {self.layer_palette_idx}")
+            
+
+            self.layer_colormap = blendImageWithColorMap(self.img, self.label, self.layer_palette, self.alpha)
+            self.pixmap = QPixmap(cvtArrayToQImage(self.layer_colormap))
+            self.resize_image()    
+
+
+        elif self.listWidgetCheckState==0 :
+            
+            self.listWidget.item(self.label_class).setCheckState(Qt.Checked)
+            
+            print(f"layer_palette : {self.layer_palette}")
+            print(f"label_palette : {self.label_palette}")
+
+            print(f"idx : {self.layer_palette_idx}")
+            self.label_palette[self.label_class]=self.layer_palette_idx
+
+
+            self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
+            self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+            self.resize_image()    
+
+
+        
+
+    def LayerOnOff(self):
+        print("Layer on&off")
+
+
+        
+        
 if __name__ == "__main__" :
     app = QApplication(sys.argv)
     myWindow = MainWindow() 

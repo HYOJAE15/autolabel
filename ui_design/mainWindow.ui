@@ -25,6 +25,89 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
+    <item row="3" column="1" colspan="2">
+     <widget class="QListWidget" name="listWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>15</width>
+        <height>15</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>350</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="currentRow">
+       <number>0</number>
+      </property>
+      <item>
+       <property name="text">
+        <string>배경</string>
+       </property>
+       <property name="background">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>240</red>
+          <green>240</green>
+          <blue>240</blue>
+         </color>
+        </brush>
+       </property>
+       <property name="flags">
+        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QToolButton" name="eraseButton">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>75</width>
+        <height>75</height>
+       </size>
+      </property>
+      <property name="toolTip">
+       <string>Eraser</string>
+      </property>
+      <property name="statusTip">
+       <string>Erasertool</string>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../Icon/eraser.png</normaloff>../Icon/eraser.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>25</width>
+        <height>25</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="0" rowspan="4">
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
@@ -265,57 +348,8 @@
       </item>
      </layout>
     </item>
-    <item row="4" column="0" colspan="3">
-     <widget class="QLabel" name="situationLabel">
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1" colspan="2">
-     <widget class="QListWidget" name="listWidget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>15</width>
-        <height>15</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>350</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
-      <item>
-       <property name="text">
-        <string>배경</string>
-       </property>
-       <property name="background">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>240</red>
-          <green>240</green>
-          <blue>240</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="flags">
-        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-     </widget>
-    </item>
-    <item row="1" column="2">
-     <widget class="QToolButton" name="HkeyButton">
+    <item row="0" column="1">
+     <widget class="QToolButton" name="brushButton">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -328,18 +362,24 @@
         <height>75</height>
        </size>
       </property>
+      <property name="focusPolicy">
+       <enum>Qt::TabFocus</enum>
+      </property>
       <property name="toolTip">
-       <string>Move Position</string>
+       <string>Brush</string>
       </property>
       <property name="statusTip">
-       <string>Position Tool</string>
+       <string>BrushTool</string>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
       </property>
       <property name="text">
        <string>...</string>
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>../Icon/move2.png</normaloff>../Icon/move2.png</iconset>
+        <normaloff>../Icon/brush.png</normaloff>../Icon/brush.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -390,8 +430,8 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="1">
-     <widget class="QToolButton" name="brushButton">
+    <item row="1" column="2">
+     <widget class="QToolButton" name="HkeyButton">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -404,24 +444,18 @@
         <height>75</height>
        </size>
       </property>
-      <property name="focusPolicy">
-       <enum>Qt::TabFocus</enum>
-      </property>
       <property name="toolTip">
-       <string>Brush</string>
+       <string>Move Position</string>
       </property>
       <property name="statusTip">
-       <string>BrushTool</string>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
+       <string>Position Tool</string>
       </property>
       <property name="text">
        <string>...</string>
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>../Icon/brush.png</normaloff>../Icon/brush.png</iconset>
+        <normaloff>../Icon/move2.png</normaloff>../Icon/move2.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -434,41 +468,10 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="2">
-     <widget class="QToolButton" name="eraseButton">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>75</width>
-        <height>75</height>
-       </size>
-      </property>
-      <property name="toolTip">
-       <string>Eraser</string>
-      </property>
-      <property name="statusTip">
-       <string>Erasertool</string>
-      </property>
+    <item row="4" column="0" colspan="3">
+     <widget class="QLabel" name="situationLabel">
       <property name="text">
-       <string>...</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>../Icon/eraser.png</normaloff>../Icon/eraser.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>25</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
+       <string/>
       </property>
      </widget>
     </item>

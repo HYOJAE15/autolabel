@@ -70,7 +70,6 @@ class BrushButton :
             self.brushMemory = True
             # self.updateLabelandColormap([x], [y])
             x_btw, y_btw = self.applyBrushSize([x], [y])
-            print(f"apply scaled points list{x_btw, y_btw}")
             self.updateLayers(x_btw, y_btw)
             self.updateLabelFromLayers(x_btw, y_btw)
             self.updateColormapFromLabel(x_btw, y_btw)

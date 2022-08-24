@@ -5,7 +5,6 @@ import sys
 
 import numpy as np 
 
-from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -24,7 +23,6 @@ class AutoLabelButton :
 
 
     def roi256(self):
-        print("roi256")
         self.brushButton.setChecked(False)
         self.roiAutoLabelButton.setChecked(True)
 
@@ -40,8 +38,7 @@ class AutoLabelButton :
     def roiRec(self):
         self.brushButton.setChecked(False)
         self.roiAutoLabelButton.setChecked(True)
-        print(f"self.use_brush {self.use_brush}")
-
+        
         self.use_brush = False
 
         self.use_erase = False
@@ -50,8 +47,25 @@ class AutoLabelButton :
         
         self.set_roi_256 = False
 
-        print(f"self.set_roi {self.set_roi}")
-        print(f"self.use_brush {self.use_brush}")
+        
+    def roiFull(self):
+        
+        result = inference_segmentor(self.model, self.img)
+        
+        # cv2.imshow("cropImage", self.img)
+        
+        idx = np.argwhere(result[0] == 1)
+        y_idx, x_idx = idx[:, 0], idx[:, 1]
+        x_idx = x_idx + 0
+        y_idx = y_idx + 0
+
+        self.label[y_idx, x_idx] = self.label_segmentation # label_palette 의 인덱스 색깔로 표현
+        
+        self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
+        self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+        self.resize_image()
+
+    
 
 
     def roi256PressPoint(self, event):
@@ -59,38 +73,27 @@ class AutoLabelButton :
         try : 
 
             x, y = getScaledPoint(event, self.scale)
+            
             if x < 128 and y < 128 :
-                print("x < 128 and y < 128")
                 self.rect_start = 0, 0
-                print(self.rect_start)
-                print(type(self.rect_start))
                 self.rect_end = x+128, y+128
             elif x < 128 :
-                print("x < 128")
                 self.rect_start = 0, y-128
                 self.rect_end = x+128, y+128
             elif y < 128 :
-                print("y < 128")
                 self.rect_start = x-128, 0
                 self.rect_end = x+128, y+128 
             else :
-                print("dang")
                 self.rect_start = x-128, y-128
                 self.rect_end = x+128, y+128
 
             
-            result = inference_segmentor(self.model_list[self.label_segmentation-1], self.img[self.rect_start[1]: self.rect_end[1],
+            result = inference_segmentor(self.model, self.img[self.rect_start[1]: self.rect_end[1],
                                             self.rect_start[0]: self.rect_end[0], :])
 
-            print(f'modelListindex {self.label_segmentation-1}')
-
-            cv2.imshow("cropImage", self.img[self.rect_start[1]: self.rect_end[1],
-                                            self.rect_start[0]: self.rect_end[0], :])
+            # cv2.imshow("cropImage", self.img[self.rect_start[1]: self.rect_end[1],
+            #                                 self.rect_start[0]: self.rect_end[0], :])
             
-
-            print(f'cropImage.shape {self.img[self.rect_start[1]: self.rect_end[1], self.rect_start[0]: self.rect_end[0], :].shape}')
-            
-
             idx = np.argwhere(result[0] == 1)
             y_idx, x_idx = idx[:, 0], idx[:, 1]
             x_idx = x_idx + self.rect_start[0]
@@ -102,13 +105,11 @@ class AutoLabelButton :
             self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
             self.resize_image()
 
-
             thickness = 2    
 
             rect_256 = cv2.rectangle(
                 self.colormap.copy(), self.rect_start, self.rect_end, (255, 255, 255), thickness)
 
-            print(f"rectangle size {self.rect_start, self.rect_end}")
             self.pixmap = QPixmap(cvtArrayToQImage(rect_256))
             self.resize_image()
             
@@ -166,7 +167,7 @@ class AutoLabelButton :
         self.rect_end[1] = np.clip(self.rect_end[1], 0, self.label.shape[0])
             
 
-        result = inference_segmentor(self.model_list[self.label_segmentation-1], self.img[self.rect_start[1]: y, self.rect_start[0]: x, :])
+        result = inference_segmentor(self.model, self.img[self.rect_start[1]: y, self.rect_start[0]: x, :])
 
         idx = np.argwhere(result[0] == 1)
         y_idx, x_idx = idx[:, 0], idx[:, 1]
@@ -174,6 +175,22 @@ class AutoLabelButton :
         y_idx = y_idx + self.rect_start[1]
 
         self.label[y_idx, x_idx] = self.label_segmentation
+        
+        self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
+        self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+        self.resize_image()
+
+    def pointsRoi(self, y_start, y_end, x_start, x_end):
+
+        result = inference_segmentor(self.model, self.img[y_start: y_end,
+                                        x_start: x_end, :])
+
+        idx = np.argwhere(result[0] == 1)
+        y_idx, x_idx = idx[:, 0], idx[:, 1]
+        x_idx = x_idx + x_start
+        y_idx = y_idx + y_start
+
+        self.label[y_idx, x_idx] = self.label_segmentation # label_palette 의 인덱스 색깔로 표현
         
         self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
         self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))

@@ -50,10 +50,8 @@ class TreeView() :
             indexItem = self.treeModel.index(index.row(), 0, index.parent())
             
             self.imgPath = self.treeModel.filePath(indexItem)
-            print(f"self.imgPath {self.imgPath}")
             self.fileNameLabel.setText(self.imgPath)
             dotSplit_imgPath = self.imgPath.split('.')
-            print(dotSplit_imgPath)
             
             if 'png' in dotSplit_imgPath :
 
@@ -64,7 +62,6 @@ class TreeView() :
                 self.label = imread(self.labelPath)
 
                 self.layers = createLayersFromLabel(self.label, len(self.label_palette))
-                print(f"layer!{self.layers}")
                 self.colormap = blendImageWithColorMap(self.img, self.label, self.label_palette, self.alpha)
                 
                 self.pixmap = QPixmap(cvtArrayToQImage(self.colormap))
@@ -80,12 +77,15 @@ class TreeView() :
             else :
                 pass
               
-        
-        except: 
-            print("Error Occured")
+        except ZeroDivisionError as e:
+
+            print(e)
+
+        # except: 
+        #     print("Error Occured")
     
 
     def askSave(self) :
         
-        print("askSave")
+        pass
         

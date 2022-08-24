@@ -14,4 +14,4 @@ pywin32-ctypes==0.2.0
 typing_extensions==4.2.0
 wincertstore==0.2
 zipp==3.8.0
-skimage
+scikit-image

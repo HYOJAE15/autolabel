@@ -60,6 +60,14 @@ class MainWindow(QMainWindow, form_class_main,
         super().__init__()
         self.setupUi(self)
 
+            # 프로그램 실행시 처음 딥러닝 모델로 균열 모델 로드 하고 시작 
+        config_file = './dnn/checkpoints/2022.01.06 cgnet general crack 2048/cgnet_2048x2048_60k_CrackAsCityscapes.py'
+        checkpoint_file = './dnn/checkpoints/2022.01.06 cgnet general crack 2048/iter_60000.pth'
+        self.model = init_segmentor(config_file, 
+                                    checkpoint_file, 
+                                    device='cuda:0')
+
+
         #### Attributes #### 
         
         self.brushSize = 2
@@ -76,6 +84,8 @@ class MainWindow(QMainWindow, form_class_main,
         self.set_roi = False
         self.set_roi_256 = False
         self.circle = True
+        # self.model = None roiMenu 에서 roi를 택한 후 딥러닝 모델 초기값이 없다
+
         
         
         
@@ -249,7 +259,7 @@ class MainWindow(QMainWindow, form_class_main,
     def updateLayers(self, x, y):
         
         try : 
-            print(f"label_class {self.label_class}")
+            # print(f"label_class {self.label_class}")
             if self.use_brush :
                 self.layers[self.label_class][y, x] = 1
 
@@ -263,15 +273,15 @@ class MainWindow(QMainWindow, form_class_main,
     def updateLabelFromLayers(self, x, y):
         self.label[y, x] = 0
         temp_label = self.label[y, x]
-        print(f"bf : {temp_label}")
+        # print(f"bf : {temp_label}")
         for idx in reversed(range(1, len(self.layers))):
             
-            print(f"layer!! {self.layers[idx][y, x]} ")
+            # print(f"layer!! {self.layers[idx][y, x]} ")
              
             temp_label = np.where(self.layers[idx][y, x], idx, temp_label)
-            print(f"af : {temp_label}") 
+            # print(f"af : {temp_label}") 
         self.label[y, x] = temp_label
-        print(f"lf {temp_label}")
+        # print(f"lf {temp_label}")
 
         
     def updateColormapFromLabel(self, x, y):
@@ -292,8 +302,9 @@ class MainWindow(QMainWindow, form_class_main,
 
 
         try : 
-            print(f"label_class {self.label_class}")
-            print(type(self.label_class))
+            # print(f"label_class {self.label_class}")
+            # print(type(self.label_class))
+            
             if self.use_brush :
                 self.label[y, x] = self.label_class
                 self.colormap[y, x] = self.img[y, x] * self.alpha + self.label_palette[self.label_class] * (1-self.alpha)
@@ -471,9 +482,7 @@ class MainWindow(QMainWindow, form_class_main,
     def setHorizontalScale(self, new_scale):
         self.hzn_scale = new_scale
 
-        # key press 에서 기능 을 키고 끄는것은 어떻게 하나
-        # turn on : 단축키 press 
-        # turn off : 한번더 press 
+         
     def keyPressEvent(self, event):
         print(event.key())
             # zoom
@@ -602,6 +611,7 @@ class MainWindow(QMainWindow, form_class_main,
                 self.situationLabel.setText(self.saveImgName + "을(를) 저장하였습니다.")
 
         # Delete Image
+
         elif event.key() == 16777223 : # Delete key
             print(event.key())
             
@@ -728,7 +738,8 @@ class MainWindow(QMainWindow, form_class_main,
 
         if self.use_brush :
             print("Brush")
-
+            # roi 설정이 되 있어야 모델 선택이 가능함
+            
         elif self.set_roi or self.set_roi_256 :
             
             if self.label_segmentation == 1 :

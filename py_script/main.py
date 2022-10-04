@@ -127,7 +127,7 @@ class MainWindow(QMainWindow, form_class_main,
 
         # 5. listWidget
         self.listWidget.itemClicked.connect(self.getListWidgetIndex)
-        self.listWidget.itemDoubleClicked.connect(self.getListWidgetCheckState)
+        # self.listWidget.itemDoubleClicked.connect(self.getListWidgetCheckState)
         self.listWidget.itemChanged.connect(self.LayerOnOff)
         
         # 6. label opacity
@@ -520,9 +520,37 @@ class MainWindow(QMainWindow, form_class_main,
             if hasattr(self, 'brushMenu'):
                 self.brushMenu.close()
 
-            if self.ControlKey :
-                self.roiFull()
+            # if self.ControlKey :
+            #     self.roiFull()
+
+        elif event.key() == 83 : # S key 
+            print("autoLabel_setRectangle")
+            self.set_roi = 1-self.set_roi
+
+            if self.set_roi : 
+                self.roiAutoLabelButton.setChecked(True)
+
+            else : 
+                self.roiAutoLabelButton.setChecked(False)
+
+
+            if self.use_erase : 
+                self.use_erase = False
+                self.eraseButton.setChecked(False)
+
+            if  hasattr(self, 'eraseMenu'):   
+                self.eraseMenu.close()
+
+            if self.use_brush :
+                self.use_brush = False
+                self.brushButton.setChecked(False)
                 
+            if hasattr(self, 'brushMenu'):
+                self.brushMenu.close()
+
+            # if self.ControlKey :
+            #     self.roiFull()
+    
 
         
         elif event.key() == 66 : # B Key
@@ -764,7 +792,7 @@ class MainWindow(QMainWindow, form_class_main,
         print("Double Clicked!!")
         print(self.listWidget.item(self.label_class).checkState())
         self.listWidgetCheckState = self.listWidget.item(self.label_class).checkState()
-        if self.listWidgetCheckState==2 :
+        if self.listWidgetCheckState==2 : # checked
 
             self.listWidget.item(self.label_class).setCheckState(Qt.Unchecked)
             

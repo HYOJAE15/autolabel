@@ -60,7 +60,7 @@ class MainWindow(QMainWindow, form_class_main,
         super().__init__()
         self.setupUi(self)
 
-            # 프로그램 실행시 처음 딥러닝 모델로 균열 모델 로드 하고 시작 
+        # Default Model
         config_file = './dnn/checkpoints/2022.01.06 cgnet general crack 2048/cgnet_2048x2048_60k_CrackAsCityscapes.py'
         checkpoint_file = './dnn/checkpoints/2022.01.06 cgnet general crack 2048/iter_60000.pth'
         self.model = init_segmentor(config_file, 
@@ -84,8 +84,7 @@ class MainWindow(QMainWindow, form_class_main,
         self.set_roi = False
         self.set_roi_256 = False
         self.circle = True
-        # self.model = None roiMenu 에서 roi를 택한 후 딥러닝 모델 초기값이 없다
-
+        
         
         
         
@@ -153,13 +152,15 @@ class MainWindow(QMainWindow, form_class_main,
         self.layerViewCheckBox.stateChanged.connect(self.layerViewMode)
 
 
+            
+
+    #### Methods ##### 
+    
     def storeXY(self, event):
         if self.ControlKey:
             self.img_v_x = event.pos().x()
             self.img_v_y = event.pos().y()
-            
-
-    #### Methods ##### 
+    
 
     ######################## 
     ### Image Processing ###
@@ -485,11 +486,11 @@ class MainWindow(QMainWindow, form_class_main,
          
     def keyPressEvent(self, event):
         print(event.key())
-            # zoom
+            
         if event.key() == Qt.Key_Control:
             self.ControlKey = True
-            # handMove
-            # h_key 한번 press 후 마우스 로 이동 
+            
+
         elif event.key() == Qt.Key_H: 
             self.hKey = True
             print(QCursor().shape())
@@ -504,6 +505,10 @@ class MainWindow(QMainWindow, form_class_main,
 
             else : 
                 self.roiAutoLabelButton.setChecked(False)
+
+            # S to A
+            if self.set_roi :
+                self.set_roi = 1-self.set_roi
 
 
             if self.use_erase : 
@@ -524,35 +529,47 @@ class MainWindow(QMainWindow, form_class_main,
             #     self.roiFull()
 
         elif event.key() == 83 : # S key 
-            print("autoLabel_setRectangle")
-            self.set_roi = 1-self.set_roi
 
-            if self.set_roi : 
-                self.roiAutoLabelButton.setChecked(True)
+            # Save File 
+            if self.ControlKey : 
+                print('Save')
+                imwrite(self.labelPath, self.label)
+                self.saveImgName = os.path.basename(self.imgPath)
+                # print(self.saveImgName)
+                self.situationLabel.setText(self.saveImgName + "을(를) 저장하였습니다.")
+            
+            # shortcut key: set_roi set Rectangle  
+            elif self.ControlKey == False :
+                print("autoLabel_setRectangle")
+                self.set_roi = 1-self.set_roi
 
-            else : 
-                self.roiAutoLabelButton.setChecked(False)
+                if self.set_roi : 
+                    self.roiAutoLabelButton.setChecked(True)
+
+                else : 
+                    self.roiAutoLabelButton.setChecked(False)
+
+                # A to S
+                if self.set_roi_256 :       
+                    self.set_roi_256 = 1-self.set_roi_256
 
 
-            if self.use_erase : 
-                self.use_erase = False
-                self.eraseButton.setChecked(False)
+                if self.use_erase : 
+                    self.use_erase = False
+                    self.eraseButton.setChecked(False)
 
-            if  hasattr(self, 'eraseMenu'):   
-                self.eraseMenu.close()
+                if  hasattr(self, 'eraseMenu'):   
+                    self.eraseMenu.close()
 
-            if self.use_brush :
-                self.use_brush = False
-                self.brushButton.setChecked(False)
-                
-            if hasattr(self, 'brushMenu'):
-                self.brushMenu.close()
+                if self.use_brush :
+                    self.use_brush = False
+                    self.brushButton.setChecked(False)
+                    
+                if hasattr(self, 'brushMenu'):
+                    self.brushMenu.close()
 
-            # if self.ControlKey :
-            #     self.roiFull()
+            
     
-
-        
         elif event.key() == 66 : # B Key
             print("B")
 
@@ -627,19 +644,9 @@ class MainWindow(QMainWindow, form_class_main,
             # Brush
             # B_key 한번 press 후 Brush 기능 키고 끄자 
 
-        # Save Image
-        elif event.key() == 83 : # S key
-            if self.ControlKey : 
-                
-                imwrite(self.labelPath, self.label)
-
-                print('Save')
-                self.saveImgName = os.path.basename(self.imgPath)
-                print(self.saveImgName)
-                self.situationLabel.setText(self.saveImgName + "을(를) 저장하였습니다.")
+        
 
         # Delete Image
-
         elif event.key() == 16777223 : # Delete key
             print(event.key())
             
@@ -663,8 +670,8 @@ class MainWindow(QMainWindow, form_class_main,
             self.hKey = False
             QApplication.restoreOverrideCursor()
             
-        # brush 기능 중 화면 이동하면 브러시 작동한다
-        # mousePress 및 Release def 로 수정
+        
+        
     def scrollAreaMousePress(self, event):
 
         self.hand_last_point = QPoint(QCursor.pos().x(), QCursor.pos().y())

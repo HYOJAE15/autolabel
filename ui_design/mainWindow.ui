@@ -219,8 +219,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>796</width>
-                 <height>479</height>
+                 <width>792</width>
+                 <height>458</height>
                 </rect>
                </property>
                <property name="layoutDirection">
@@ -483,7 +483,7 @@
      <x>0</x>
      <y>0</y>
      <width>1397</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menufile">
@@ -494,7 +494,6 @@
     <addaction name="actionOpenProject"/>
     <addaction name="actionAddNewImages"/>
     <addaction name="separator"/>
-    <addaction name="actionOpenFolder"/>
    </widget>
    <widget class="QMenu" name="menuhelp">
     <property name="title">

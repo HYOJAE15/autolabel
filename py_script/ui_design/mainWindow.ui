@@ -95,7 +95,7 @@
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>eraser.png</normaloff>eraser.png</iconset>
+        <normaloff>icon/eraser.png</normaloff>icon/eraser.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -372,7 +372,7 @@
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>brush.png</normaloff>brush.png</iconset>
+        <normaloff>icon/brush.png</normaloff>icon/brush.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -410,7 +410,7 @@
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>Local.png</normaloff>Local.png</iconset>
+        <normaloff>icon/Local.png</normaloff>icon/Local.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -448,7 +448,7 @@
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>move2.png</normaloff>move2.png</iconset>
+        <normaloff>icon/move2.png</normaloff>icon/move2.png</iconset>
       </property>
       <property name="iconSize">
        <size>

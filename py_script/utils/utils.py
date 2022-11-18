@@ -48,21 +48,19 @@ def getScaledPoint(event, scale):
 
     return x, y 
 
-def resource_path(relative_path): 
-    """ 
-    Get absolute path to resource, works for dev and for PyInstaller 
+def append_Path(file, level=1):
+    """Append environmental path 
 
-    Args :
-        relative_path (str)
+    Args: 
+        file (str): file directory, mostly obtained by '__file__' variable. 
+        level (int): number of parental folder to be added, default = 1 
     
-    Return 
-        abs_path (str)
-    """ 
-    
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__))) 
-    abs_path = os.path.join(base_path, relative_path)
-    
-    return abs_path
+    """
+
+    for _ in range(level):
+        append_to = os.path.dirname(os.path.abspath( os.path.dirname(file)))
+        sys.path.append(append_to)
+
 
 def cvtArrayToQImage(array):
 

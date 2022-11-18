@@ -54,10 +54,6 @@ class BrushButton :
     def updateBrushState(self):
         
         self.use_brush = True
-        
-        print(f"type_self.use_brush {type(self.use_brush)}")
-        print(f"self.use_brush {self.use_brush}")
-        print(f"self.set_roi {self.set_roi}")
 
 
     def brushPressOrReleasePoint(self, event):

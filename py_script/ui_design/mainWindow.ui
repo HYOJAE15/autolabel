@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1397</width>
-    <height>620</height>
+    <width>1331</width>
+    <height>634</height>
    </rect>
   </property>
   <property name="focusPolicy">
@@ -18,7 +18,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../Icon/chalk.png</normaloff>../Icon/chalk.png</iconset>
+    <normaloff>chalk.png</normaloff>chalk.png</iconset>
   </property>
   <property name="animated">
    <bool>true</bool>
@@ -95,7 +95,7 @@
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>../Icon/eraser.png</normaloff>../Icon/eraser.png</iconset>
+        <normaloff>eraser.png</normaloff>eraser.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -110,32 +110,7 @@
     </item>
     <item row="0" column="0" rowspan="4">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="fileNameLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>18</height>
-         </size>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="text">
-         <string>File Name</string>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QSplitter" name="splitter">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -219,8 +194,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>792</width>
-                 <height>458</height>
+                 <width>748</width>
+                 <height>472</height>
                 </rect>
                </property>
                <property name="layoutDirection">
@@ -266,13 +241,6 @@
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QCheckBox" name="layerViewCheckBox">
-              <property name="text">
-               <string>Layer View Mode</string>
-              </property>
-             </widget>
-            </item>
             <item>
              <spacer name="horizontalSpacer">
               <property name="orientation">
@@ -346,6 +314,31 @@
         </widget>
        </widget>
       </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="fileNameLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>18</height>
+         </size>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="text">
+         <string>File Name</string>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item row="0" column="1">
@@ -379,7 +372,7 @@
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>../Icon/brush.png</normaloff>../Icon/brush.png</iconset>
+        <normaloff>brush.png</normaloff>brush.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -417,7 +410,7 @@
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>../Icon/Local.png</normaloff>../Icon/Local.png</iconset>
+        <normaloff>Local.png</normaloff>Local.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -455,7 +448,7 @@
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>../Icon/move2.png</normaloff>../Icon/move2.png</iconset>
+        <normaloff>move2.png</normaloff>move2.png</iconset>
       </property>
       <property name="iconSize">
        <size>
@@ -482,7 +475,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1397</width>
+     <width>1331</width>
      <height>26</height>
     </rect>
    </property>

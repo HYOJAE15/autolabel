@@ -1,11 +1,10 @@
-import sys
-from tabnanny import check
+#!/usr/bin/python3
+import os, sys
+
 import cv2
 
 import json
-import os
 
-from copy import deepcopy
 
 import numpy as np 
 
@@ -36,17 +35,16 @@ from components.opener.dialogOpener import dialogOpener
 from components.widgets.treeView import TreeView
 
 from components.model.concreteDamage import DnnModel
+from ui_design.__import__ import ui_path
 
-
-# sys.path.append("./dnn/mmsegmentation")
-# from mmseg.apis import init_segmentor
 
 import time
+
 # Select folder "autolabel"
 # MainWindow UI
-project_ui = '../../ui_design/mainWindow.ui'
+project_ui = 'mainWindow.ui'
 
-form = resource_path(project_ui)
+form = ui_path(project_ui)
 form_class_main = uic.loadUiType(form)[0]
 
 # Mainwindow class

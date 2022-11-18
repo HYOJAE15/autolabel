@@ -9,8 +9,8 @@ from PyQt5.QtCore import *
 
 from utils.utils import *
 
-sys.path.append("./dnn/mmsegmentation")
-from mmseg.apis import init_segmentor, inference_segmentor
+# sys.path.append("./dnn/mmsegmentation")
+# from mmseg.apis import init_segmentor, inference_segmentor
 
 
 class DnnModel :

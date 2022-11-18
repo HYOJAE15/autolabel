@@ -143,7 +143,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>plus.png</normaloff>plus.png</iconset>
+     <normaloff>icon/plus.png</normaloff>icon/plus.png</iconset>
    </property>
   </widget>
   <widget class="QPushButton" name="deleteRowButton">

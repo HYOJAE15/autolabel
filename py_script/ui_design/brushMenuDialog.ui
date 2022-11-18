@@ -108,7 +108,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>icon/square.png</normaloff>square.png</iconset>
+         <normaloff>icon/square.png</normaloff>icon/square.png</iconset>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -128,7 +128,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>circle.png</normaloff>circle.png</iconset>
+         <normaloff>icon/circle.png</normaloff>icon/circle.png</iconset>
        </property>
        <property name="checkable">
         <bool>true</bool>

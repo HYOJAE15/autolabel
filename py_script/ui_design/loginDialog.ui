@@ -32,7 +32,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>chalk_bundle.png</pixmap>
+      <pixmap>icon/chalk_bundle.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>

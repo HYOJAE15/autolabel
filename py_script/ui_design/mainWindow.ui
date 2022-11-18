@@ -18,7 +18,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>chalk.png</normaloff>chalk.png</iconset>
+    <normaloff>icon/chalk.png</normaloff>icon/chalk.png</iconset>
   </property>
   <property name="animated">
    <bool>true</bool>

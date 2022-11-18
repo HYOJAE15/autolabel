@@ -6,7 +6,6 @@ from ui_design.__import__ import ui_path
 
 eraseMenu_ui = 'eraseMenuDialog.ui'
 
-
 form_eraseMenu = ui_path(eraseMenu_ui)
 form_class_eraseMenu = uic.loadUiType(form_eraseMenu)[0]
 
@@ -26,7 +25,6 @@ class EraseMenu(QDialog, form_class_eraseMenu):
             number += 1
 
         self.eraseSize = number
-        print(self.eraseSize)
         self.eraselineEdit.setText(f'{number} px')
             
 

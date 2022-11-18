@@ -3,8 +3,7 @@ import sys
 import os 
 
 def ui_path(relative_path, file=None): 
-    """ 
-    Get absolute path to resource, works for dev and for PyInstaller 
+    """Get absolute path to resource, works for dev and for PyInstaller 
 
     Args :
         relative_path (str)

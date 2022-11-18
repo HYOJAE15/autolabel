@@ -1,5 +1,4 @@
 
-from re import L
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from ui_design.__import__ import ui_path

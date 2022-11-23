@@ -1,14 +1,12 @@
-#!/usr/bin/python3
 import os, sys
 
 import cv2
 
 import json
 
-
 import numpy as np 
 
-from PyQt5 import QtCore, QtGui, uic, QtWidgets
+from PyQt5 import QtCore, uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -17,18 +15,13 @@ from scipy import ndimage
 
 from utils.utils import *
 
-
 from components.actions.actionFile import ActionFile
 
 from components.buttons.autoLabelButton import AutoLabelButton
 from components.buttons.brushButton import BrushButton
 from components.buttons.eraseButton import EraseButton
-from components.buttons.zoomButton import ZoomButton
 
-from components.dialogs.brushMenuDialog import BrushMenu
-from components.dialogs.eraseMenuDialog import EraseMenu
 from components.dialogs.newProjectDialog import newProjectDialog
-from components.dialogs.setCategoryDialog import setCategoryDialog
 
 from components.opener.dialogOpener import dialogOpener
 
@@ -37,8 +30,6 @@ from components.widgets.treeView import TreeView
 from components.model.concreteDamage import DnnModel
 from ui_design.__import__ import ui_path
 
-
-import time
 
 # Select folder "autolabel"
 # MainWindow UI
@@ -153,9 +144,9 @@ class MainWindow(QMainWindow, form_class_main,
     
         # 8. handMoveTool
         self.hKey = False
-        self.icon = QPixmap("./Icon/square.png")
-        self.scaled_icon = self.icon.scaled(QSize(5, 5), Qt.KeepAspectRatio)
-        self.custom_cursor = QCursor(self.scaled_icon)
+        # self.icon = QPixmap("/ui_design/icon/square.png")
+        # self.scaled_icon = self.icon.scaled(QSize(5, 5), Qt.KeepAspectRatio)
+        # self.custom_cursor = QCursor(self.scaled_icon)
 
 
 

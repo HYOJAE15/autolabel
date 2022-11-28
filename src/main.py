@@ -28,27 +28,21 @@ from components.opener.dialogOpener import dialogOpener
 from components.widgets.treeView import TreeView
 
 from components.model.concreteDamage import DnnModel
-from ui_design.__import__ import ui_path
+from ui_design.__import__ import load_ui
 
 
-# Select folder "autolabel"
 # MainWindow UI
-project_ui = 'mainWindow.ui'
 
-form = ui_path(project_ui)
-form_class_main = uic.loadUiType(form)[0]
+ui = load_ui('mainWindow.ui')
 
 # Mainwindow class
 
-class MainWindow(QMainWindow, form_class_main,
+class MainWindow(QMainWindow, ui,
                  AutoLabelButton, BrushButton, EraseButton,
-                 dialogOpener, 
-                 ActionFile, TreeView) :
+                 dialogOpener, ActionFile, TreeView) :
     def __init__(self) :
         super().__init__()
         self.setupUi(self)
-
-        # from ** import ** 
 
         # Default Model
         # # FIXME fix hard coding ... 
@@ -102,7 +96,6 @@ class MainWindow(QMainWindow, form_class_main,
         self.treeView.clicked.connect(self.askSave)
         
         # 1. Menu
-        self.actionOpenFolder.triggered.connect(self.actionOpenFolderFunction)
         self.actionAddNewImages.triggered.connect(self.addNewImages)
         self.actionNewProject.triggered.connect(self.createNewProjectDialog)
         self.actionOpenProject.triggered.connect(self.openExistingProject)
@@ -148,8 +141,8 @@ class MainWindow(QMainWindow, form_class_main,
         # self.scaled_icon = self.icon.scaled(QSize(5, 5), Qt.KeepAspectRatio)
         # self.custom_cursor = QCursor(self.scaled_icon)
 
-
-
+        # 9. login Dialog 
+        self.openLoginWindow()
             
 
     #### Methods ##### 
@@ -160,11 +153,6 @@ class MainWindow(QMainWindow, form_class_main,
         if self.ControlKey:
             self.img_v_x = event.pos().x()
             self.img_v_y = event.pos().y()
-    
-
-    ######################## 
-    ### Image Processing ###
-    ########################
 
 
     def addNewImages(self):
@@ -349,6 +337,8 @@ class MainWindow(QMainWindow, form_class_main,
 
 
     def openExistingProject(self):
+        """Open Existing Project File
+        """
 
         try :
 

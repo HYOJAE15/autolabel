@@ -9,5 +9,25 @@ class LoginWindow(QDialog, ui):
     def __init__(self) :
         super().__init__()
         self.setupUi(self)
+
+        self.okButton.clicked.connect(self.saveUserName)
+        self.cancelButton.clicked.connect(self.exit)
+    
+    def saveUserName(self):
+
+        self.user_name = self.lineEdit.text()
+
+        self.close()
+
+    def exit(self):
+        exit()
         
-        self.horizontalSlider.valueChanged.connect(self.changeSliderValueText)
+
+
+
+        
+
+    
+
+
+        

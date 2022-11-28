@@ -4,7 +4,7 @@ from PyQt5 import QtCore
 from components.dialogs.brushMenuDialog import BrushMenu
 from components.dialogs.eraseMenuDialog import EraseMenu
 from components.dialogs.setCategoryDialog import setCategoryDialog
-
+from components.dialogs.loginWindowDialog import LoginWindow
 
 
 class dialogOpener :
@@ -12,12 +12,22 @@ class dialogOpener :
         super().__init__()
 
 
-    ########################### 
-    ### Dialog Opener ###
-    ###########################
+    def openLoginWindow(self): 
+        """Open Login Window when program start
+            Show always on top
+        """
+
+        self.LoginWindow = LoginWindow()
+        self.LoginWindow.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        self.LoginWindow.exec_()
+
 
     def openCategoryInfoDialog(self, event):
+        """Open Category Information Dialog
 
+        Args: 
+            event (button.clicked)
+        """
         self.newProjectDialog.close()
 
         self.setCategoryDialog = setCategoryDialog()
@@ -57,7 +67,7 @@ class dialogOpener :
 
         
     def openEraseDialog(self, event):
-        print("erase")
+    
         self.eraseButton.setChecked(True)
         self.use_erase = True
         self.eraseMenu = EraseMenu()

@@ -4,14 +4,11 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt
-from ui_design.__import__ import ui_path
+from ui_design.__import__ import load_ui
 
-brushMenu_ui = 'setCategoryInfo.ui'
+ui = load_ui('setCategoryInfo.ui')
 
-form_brushMenu = ui_path(brushMenu_ui)
-form_class_brushMenu = uic.loadUiType(form_brushMenu)[0]
-
-class setCategoryDialog(QDialog, form_class_brushMenu):
+class setCategoryDialog(QDialog, ui):
     def __init__(self) :
         super().__init__()
         self.setupUi(self)

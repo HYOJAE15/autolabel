@@ -1,15 +1,11 @@
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
-from ui_design.__import__ import ui_path
+from ui_design.__import__ import load_ui
 
-brushMenu_ui = 'brushMenuDialog.ui'
+ui = load_ui('brushMenuDialog.ui')
 
-form_brushMenu = ui_path(brushMenu_ui)
-form_class_brushMenu = uic.loadUiType(form_brushMenu)[0]
-
-
-class BrushMenu(QDialog, form_class_brushMenu):
+class BrushMenu(QDialog, ui):
     def __init__(self) :
         super().__init__()
         self.setupUi(self)

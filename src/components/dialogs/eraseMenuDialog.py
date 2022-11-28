@@ -1,14 +1,11 @@
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
-from ui_design.__import__ import ui_path
+from ui_design.__import__ import load_ui
 
-eraseMenu_ui = 'eraseMenuDialog.ui'
+ui = load_ui('eraseMenuDialog.ui')
 
-form_eraseMenu = ui_path(eraseMenu_ui)
-form_class_eraseMenu = uic.loadUiType(form_eraseMenu)[0]
-
-class EraseMenu(QDialog, form_class_eraseMenu):
+class EraseMenu(QDialog, ui):
     def __init__(self) :
         super().__init__()
         self.setupUi(self)

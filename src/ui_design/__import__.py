@@ -2,7 +2,9 @@
 import sys 
 import os 
 
-def ui_path(relative_path, file=None): 
+from PyQt5 import uic
+
+def load_ui_path(relative_path, file=None): 
     """Get absolute path to resource, works for dev and for PyInstaller 
 
     Args :
@@ -17,3 +19,16 @@ def ui_path(relative_path, file=None):
     abs_path = os.path.join(base_path, relative_path)
     
     return abs_path
+
+def load_ui(name):
+    """Load UI file and return UI object
+    Args:
+        name (str): name of ui file to load 
+    
+    Returns: 
+        ui (object)
+    """
+
+    ui_path = load_ui_path(name)
+    ui = uic.loadUiType(ui_path)[0]
+    return ui
